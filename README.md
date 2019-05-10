@@ -1,6 +1,6 @@
 # stunning-octo-potato
 
-##The Blob Project
+## The Blob Project
 
 This Project is the attempt at creating something fun and enjoyable, while also using the skills I have aquired over the course of a year in web development. 
 
