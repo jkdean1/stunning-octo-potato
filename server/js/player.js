@@ -40,7 +40,7 @@ class Player {
         this.canvasYMax = 0;
     }
 
-    clicked(cells) {
+    clicked(cells, blobs) {
         if ((this.mouseSelectFirstX == this.mouseSelectSecondX) && (this.mouseSelectFirstY == this.mouseSelectSecondY)) {
 
             var x = this.mouseSelectFirstX + this.canvasXZero;
@@ -59,6 +59,66 @@ class Player {
             }
         } else {
 
+            var x1 = this.mouseSelectFirstX + this.canvasXZero;
+            var y1 = this.mouseSelectFirstY + this.canvasYZero;
+
+            var x2 = this.mouseSelectSecondX + this.canvasXZero;
+            var y2 = this.mouseSelectSecondY + this.canvasYZero;
+
+            if(x1 > x2){
+                var temp = x1;
+                x1 = x2;
+                x2 = temp;
+            }
+
+            if(y1 > y2){
+                var temp = y1;
+                y1 = y2;
+                y2 = temp;
+            }
+
+            for (var i in blobs) {
+                var blobi = blobs[i];
+                for (var j in blobs[i]) {
+                    var blob = blobi[j];
+                    if (blob.x > x1 && blob.y > y1 && blob.x < x2 && blob.y < y2) {
+                        blob.selected = true;
+                    } else {}
+                }
+            }
+        }
+
+        this.mouseSelectFirstX = this.mouseSelectSecondX;
+        this.mouseSelectFirstY = this.mouseSelectSecondY;
+    }
+
+    rightclicked(cells, blobs, x, y) {
+        for (var i in cells) {
+            var cell = cells[i];
+            if (cell.id == this.socket_id && cell.selected == true) {
+
+                var sendx = Math.floor(x + this.canvasXZero);
+                var sendy = Math.floor(y + this.canvasYZero);
+
+                cell.tx = sendx;
+                cell.ty = sendy;
+            }
+        }
+
+        for (var i in blobs) {
+            var blobi = blobs[i];
+            for (var j in blobi) {
+                var blob = blobi[j];
+
+                if (blob.id == this.socket_id && blob.selected == true) {
+
+                    var sendx = Math.floor(x + this.canvasXZero);
+                    var sendy = Math.floor(y + this.canvasYZero);
+
+                    blob.tx = sendx;
+                    blob.ty = sendy;
+                }
+            }
         }
     }
 

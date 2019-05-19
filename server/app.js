@@ -18,7 +18,7 @@ var gameport = c.port;
 var DEBUG = c.debug;
 
 //Generate the map using the config file
-var map = new Map(c.mapwidth * c.tileWidth, c.mapheight * c.tileHeight);
+var map = new Map(c.mapwidth * c.tileWidth, c.mapheight * c.tileHeight, c);
 
 //Default location for the client
 app.get('/', function (req, res) {
@@ -35,6 +35,7 @@ Log("app", "Server Started", "info", true);
 var SOCKET_LIST = {};
 var PLAYER_LIST = [];
 var CELL_LIST = [];
+var BLOB_LIST = {};
 
 //Create socket connection.
 var io = require('socket.io')(serv, {});
@@ -69,13 +70,26 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
+    var blobList = [];
+    BLOB_LIST[socket.id] = blobList; 
+
     //When the player disconnects
     socket.on('disconnect', function () {
         if (DEBUG)
             Log("app", "Socket Deleted: " + socket.id, "info", false);
         delete PLAYER_LIST[socket.id];
         delete SOCKET_LIST[socket.id];
-        delete CELL_LIST[socket.id];
+
+        //Delete the cells when the player leaves
+        CELL_LIST = [];
+        for(var i in CELL_LIST)
+        {
+            if(cell.id != socket.id){
+                CELL_LIST.push(CELL_LIST[i]);
+            }
+        }
+
+        delete BLOB_LIST[socket.id];
     });
 
     //When the players window is resized
@@ -109,10 +123,15 @@ io.sockets.on('connection', function (socket) {
     });
 
     //When the player clicks the mouse down.
-    socket.on('mousedown', function (data) {
+    socket.on('leftmousedown', function (data) {
         player.mouseDown = data.state;
         player.mouseSelectFirstX = data.x;
         player.mouseSelectFirstY = data.y;
+    });
+
+    //When the player clicks the mouse down.
+    socket.on('rightmousedown', function (data) {
+        player.rightclicked(CELL_LIST, BLOB_LIST, data.x, data.y);
     });
 
     //When the player lets the mouse go. 
@@ -120,7 +139,17 @@ io.sockets.on('connection', function (socket) {
         player.mouseDown = data.state;
         player.mouseSelectSecondX = data.x;
         player.mouseSelectSecondY = data.y;
-        player.clicked(CELL_LIST);
+
+        for(var i in BLOB_LIST){
+            var blobi = BLOB_LIST[i]
+            for(var j in blobi)
+            {
+                var b = blobi[j];
+                b.selected = false;
+            }
+        }
+
+        player.clicked(CELL_LIST, BLOB_LIST);
     });
 });
 
@@ -137,10 +166,25 @@ setInterval(function () {
 
         for (var c in CELL_LIST) {
             var cell = CELL_LIST[c];
+            cell.update(BLOB_LIST[socket.id]);
             cells.push(cell.getInfo());
         }
 
         socket.emit('cells', cells);
+
+        var blobs = [];
+
+        for(var b1 in BLOB_LIST){
+            var blobArray = BLOB_LIST[b1];
+            for(var b2 in blobArray){
+                var blob = blobArray[b2];
+                blob.update();
+                blobs.push(blob.getInfo());
+            }
+        }
+
+        socket.emit('blobs', blobs);
+        //console.log(blobs);
 
         player.updatePosition();
     }

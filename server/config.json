@@ -5,6 +5,6 @@
     "debug": true,
     "mapwidth": 50,
     "mapheight": 50,
-    "tileWidth": 161,
-    "tileHeight": 119
+    "tileWidth": 128, 
+    "tileHeight": 128
 }

@@ -25,10 +25,12 @@ var currMouseY = 0;
 var map;
 var circles;
 var backgroundImage = new Image();
-backgroundImage.src = 'client/res/img/maybe_tileable.jpg';
+//backgroundImage.src = 'client/res/img/maybe_tileable.jpg';
+backgroundImage.src = 'client/res/img/tile2.jpg';
 
 //Cell variables
 var cells = [];
+var blobs = [];
 
 socket.on('connected', function (data) {
 
@@ -54,7 +56,13 @@ socket.on('message', function (data) {
 });
 
 socket.on('cells', function (data) {
+    cells = [];
     cells = data;
+});
+
+socket.on('blobs', function (data) {
+    blobs = [];
+    blobs = data;
 });
 
 function setup() {
@@ -114,7 +122,27 @@ function draw(dt) {
 
             if (cell.selected) {
                 context.strokeStyle = "green";
-                context.lineWidth = 4;
+                context.lineWidth = 3;
+                context.stroke();
+            }
+
+        }
+    }
+
+    //draw the blobs
+    if (blobs) {
+        for (var i = 0; i < blobs.length; i++) {
+            var blob = blobs[i];
+
+            context.fillStyle = blob.color;
+            context.beginPath();
+            context.arc(blob.x, blob.y, blob.size, 0, Math.PI * 2);
+            context.closePath();
+            context.fill();
+
+            if (blob.selected) {
+                context.strokeStyle = "green";
+                context.lineWidth = 1;
                 context.stroke();
             }
 
@@ -227,15 +255,27 @@ function getRandomInt(min, max) {
 
 document.onmousedown = function (event) {
 
-    mouseDown = true;
-    lastMouseX = event.x;
-    lastMouseY = event.y;
-
-    socket.emit('mousedown', {
-        state: true,
-        x: event.x,
-        y: event.y
-    });
+    if(event.which == 1){
+        //Left Click
+        mouseDown = true;
+        lastMouseX = event.x;
+        lastMouseY = event.y;
+    
+        socket.emit('leftmousedown', {
+            state: true,
+            x: event.x,
+            y: event.y
+        });
+    } else if(event.which == 3){
+        //Right Click
+        lastMouseX = event.x;
+        lastMouseY = event.y;
+    
+        socket.emit('rightmousedown', {
+            x: event.x,
+            y: event.y
+        });
+    }
 }
 
 document.onmouseup = function (event) {
