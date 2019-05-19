@@ -6,6 +6,7 @@ var fs = require('fs');
 var Player = require('./js/player.js');
 var Map = require('./js/map.js');
 var Cell = require('./js/cell.js');
+var QuadTreeModule = require('./js/quadtree.js');
 
 //Load Config Data
 var rawdata = fs.readFileSync('./config.json');
@@ -19,6 +20,12 @@ var DEBUG = c.debug;
 
 //Generate the map using the config file
 var map = new Map(c.mapwidth * c.tileWidth, c.mapheight * c.tileHeight, c);
+
+//Create the rectangle for the quadtree
+var rectangle = new QuadTreeModule.Rectangle((c.mapwidth * c.tileWidth) / 2, (c.mapheight * c.tileHeight) / 2, (c.mapwidth * c.tileWidth) / 2, (c.mapheight * c.tileHeight) / 2,);
+
+//Create the quadtree
+var QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
 
 //Default location for the client
 app.get('/', function (req, res) {
@@ -66,9 +73,8 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
-    cell = new Cell(socket.id, randomX + 200, randomY + 200);
-    cell.color = player.color;
-    CELL_LIST.push(cell);
+    //INSERT ALL POINTS INTO THE QUADTREE!!!!
+    var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
 
     var blobList = [];
     BLOB_LIST[socket.id] = blobList; 
