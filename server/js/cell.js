@@ -23,7 +23,7 @@ class Cell {
         this.tx = this.x;
         this.ty = this.y;
 
-        this.counterMax = 200;
+        this.counterMax = 1;
         this.counter = this.counterMax;
     }
 
