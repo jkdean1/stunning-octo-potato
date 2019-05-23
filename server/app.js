@@ -18,11 +18,19 @@ var serv = require('http').Server(app);
 var gameport = c.port;
 var DEBUG = c.debug;
 
+//config variables
+var mapWidth = c.mapWidth;
+var mapHeight = c.mapHeight;
+var tileWidth = c.tileWidth;
+var tileHeight = c.tileHeight;
+
+console.log(mapWidth + "  " + mapHeight + "  " + tileWidth + "  " + tileHeight);
+
 //Generate the map using the config file
-var map = new Map(c.mapwidth * c.tileWidth, c.mapheight * c.tileHeight, c);
+var map = new Map(mapWidth * tileWidth, mapHeight * tileHeight, c);
 
 //Create the rectangle for the quadtree
-var rectangle = new QuadTreeModule.Rectangle((c.mapwidth * c.tileWidth) / 2, (c.mapheight * c.tileHeight) / 2, (c.mapwidth * c.tileWidth) / 2, (c.mapheight * c.tileHeight) / 2,);
+var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2,);
 
 //Create the quadtree
 var QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
@@ -62,8 +70,8 @@ io.sockets.on('connection', function (socket) {
     }
 
     //Create the Player
-    var randomX = Math.floor(Util.getRandomInt(0, c.mapwidth * c.tileWidth));
-    var randomY = Math.floor(Util.getRandomInt(0, c.mapheight * c.tileHeight));
+    var randomX = Math.floor(Util.getRandomInt(0, mapWidth * tileWidth));
+    var randomY = Math.floor(Util.getRandomInt(0, mapHeight * tileHeight));
     var player = new Player(socket.id, randomX, randomY);
     //Add the player to the player list at the id of the socket
     PLAYER_LIST[socket.id] = player;
@@ -73,8 +81,13 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
+    cell = new Cell(socket.id, randomX + 100, randomY + 100);
+    cell.color = player.color;
+    CELL_LIST.push(cell);
+
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
+    QUADTREE.insert(point);
 
     var blobList = [];
     BLOB_LIST[socket.id] = blobList; 
@@ -87,12 +100,18 @@ io.sockets.on('connection', function (socket) {
         delete SOCKET_LIST[socket.id];
 
         //Delete the cells when the player leaves
-        CELL_LIST = [];
+        var tempList = [];
         for(var i in CELL_LIST)
         {
-            if(cell.id != socket.id){
-                CELL_LIST.push(CELL_LIST[i]);
+            if(CELL_LIST[i].id != socket.id){
+                tempList.push(CELL_LIST[i]);
             }
+        }
+
+        CELL_LIST.length = 0;
+        for(var i in tempList){
+            var c = tempList[i];
+            CELL_LIST.push(c);
         }
 
         delete BLOB_LIST[socket.id];
@@ -159,8 +178,18 @@ io.sockets.on('connection', function (socket) {
     });
 });
 
+function doCirclesOverlap(x1, y1, r1, x2, y2, r2){
+    return Math.abs((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < (r1 + r2) * (r1 + r2);
+}
+
 //The current "game loop" -This needs to be updated later to be more functional. 
 setInterval(function () {
+
+    //Create the rectangle for the quadtree
+    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2,);
+    //Create the quadtree
+    QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
+
     for (var p in PLAYER_LIST) {
         var player = PLAYER_LIST[p];
         var socket = SOCKET_LIST[player.socket_id]
@@ -174,6 +203,8 @@ setInterval(function () {
             var cell = CELL_LIST[c];
             cell.update(BLOB_LIST[socket.id]);
             cells.push(cell.getInfo());
+            var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
+            QUADTREE.insert(point);
         }
 
         socket.emit('cells', cells);
@@ -183,9 +214,34 @@ setInterval(function () {
         for(var b1 in BLOB_LIST){
             var blobArray = BLOB_LIST[b1];
             for(var b2 in blobArray){
-                var blob = blobArray[b2];
-                blob.update();
-                blobs.push(blob.getInfo());
+                //var blob = blobArray[b2];
+                //blob.update();
+                //blobs.push(blob.getInfo());
+            }
+        }
+
+        //Deal with colision
+        for(var i in CELL_LIST){
+            var p = CELL_LIST[i];
+            let range = new QuadTreeModule.Circle(p.x, p.y, p.size * 4);
+            let others = QUADTREE.query(range);
+            for(var j in others){
+                var other = others[j].data;
+                if(other != p){
+                    if(doCirclesOverlap(p.x, p.y, p.size, other.x, other.y, other.size)){
+                        var distance = Math.sqrt((p.x - other.x) * (p.x - other.x) + (p.y - other.y) * (p.y - other.y));
+                        var midPointX = (p.x + other.x) / 2;
+                        var midPointY = (p.y + other.y) / 2;
+                        p.x = midPointX + p.size * ((p.x - other.x) / distance);
+                        p.tx = p.x;
+                        p.y = midPointY + p.size * ((p.y - other.y) / distance);
+                        p.ty = p.y;
+                        other.x = midPointX + other.size * (other.x - p.x) / distance;
+                        other.tx = other.x;
+                        other.y = midPointY + other.size * (other.y - p.y) / distance;
+                        other.ty = other.y;
+                    }
+                }
             }
         }
 

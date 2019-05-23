@@ -3,8 +3,8 @@
     "host": "0.0.0.0",
     "port": 3000,
     "debug": true,
-    "mapwidth": 50,
-    "mapheight": 50,
+    "mapWidth": 50,
+    "mapHeight": 50,
     "tileWidth": 128, 
     "tileHeight": 128
 }

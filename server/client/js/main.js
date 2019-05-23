@@ -26,7 +26,7 @@ var map;
 var circles;
 var backgroundImage = new Image();
 //backgroundImage.src = 'client/res/img/maybe_tileable.jpg';
-backgroundImage.src = 'client/res/img/tile2.jpg';
+backgroundImage.src = 'client/res/img/tile1.jpg';
 
 //Cell variables
 var cells = [];
@@ -103,7 +103,7 @@ function draw(dt) {
     if (map) {
         for (var i = 0; i < map.length; i++) {
             context.fillStyle = map[i].color;
-            //context.fillRect(map[i].x, map[i].y, map[i].width, map[i].height);
+            context.fillRect(map[i].x, map[i].y, map[i].width, map[i].height);
             context.drawImage(backgroundImage, map[i].x, map[i].y);
         }
     }
