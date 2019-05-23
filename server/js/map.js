@@ -3,14 +3,14 @@ var Tile = require('./tile.js');
 
 class Map {
 
-    constructor(w, h) {
+    constructor(w, h, c) {
         this.width = w;
         this.height = h;
         this.map = [];
 
-        for (var i = 0; i < this.width; i += 161) {
-            for (var j = 0; j < this.height; j += 119) {
-                var t = new Tile(i, j, 161, 119, Util.getRandomColor());
+        for (var i = 0; i < this.width; i += c.tileWidth) {
+            for (var j = 0; j < this.height; j += c.tileHeight) {
+                var t = new Tile(i, j, c.tileWidth, c.tileHeight, Util.getRandomColor());
                 this.map.push(t);
             }
         }

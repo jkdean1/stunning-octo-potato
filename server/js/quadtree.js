@@ -6,8 +6,6 @@ class Point {
     }
 }
 
-module.exports = Point;
-
 class Rectangle {
     constructor(x, y, w, h) {
         this.x = x;
@@ -30,8 +28,6 @@ class Rectangle {
             range.y + range.y < this.y - this.h);
     }
 }
-
-module.exports = Rectangle;
 
 class Circle {
     constructor(x, y, r) {
@@ -71,9 +67,6 @@ class Circle {
         return edges <= this.rSquared;
     }
 }
-
-module.exports = Circle;
-
 
 class QuadTree {
     constructor(boundary, c) {
@@ -157,4 +150,9 @@ class QuadTree {
     }
 }
 
-module.exports = Quadtree;
+module.exports = {
+    QuadTree: QuadTree,
+    Circle: Circle,
+    Rectangle: Rectangle,
+    Point: Point
+};
