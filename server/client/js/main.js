@@ -8,7 +8,14 @@ var canvas;
 var context;
 var width;
 var height;
+
+var mapWidth;
+var mapHeight;
+var tileWidth;
+var tileheight;
+
 var mouseDown = false;
+var highQuality = true;
 
 //containers
 var players = [];
@@ -25,8 +32,7 @@ var currMouseY = 0;
 var map;
 var circles;
 var backgroundImage = new Image();
-//backgroundImage.src = 'client/res/img/maybe_tileable.jpg';
-backgroundImage.src = 'client/res/img/tile1.jpg';
+backgroundImage.src = 'client/res/img/tile2.jpg';
 
 //Cell variables
 var cells = [];
@@ -36,6 +42,10 @@ socket.on('connected', function (data) {
 
     ID = data.id;
     DEBUG = data.debug;
+    mapWidth = data.width;
+    mapHeight = data.height;
+    tileWidth = data.tileWidth;
+    tileHeight = data.tileHeight;
 
     if (DEBUG) {
         console.log("Connected, Your ID: " + ID);
@@ -99,12 +109,23 @@ function draw(dt) {
     //Reset the fillStyle
     context.fillStyle = "black";
 
-    //Draw Background
-    if (map) {
-        for (var i = 0; i < map.length; i++) {
-            context.fillStyle = map[i].color;
-            context.fillRect(map[i].x, map[i].y, map[i].width, map[i].height);
-            context.drawImage(backgroundImage, map[i].x, map[i].y);
+    var tempX = 0;
+    var tempY = 0;
+
+    if (highQuality) {
+        //Draw Background
+        for(var i = 0; i < mapWidth; i++){
+            for(var j = 0; j < mapHeight; j++){
+
+                tempX = i * tileWidth;
+                tempY = j * tileHeight;
+
+                if(tempX > canvasX && tempY > canvasY){
+                    if(tempX < canvasX + width - 100 && tempY < canvasY + height - 100){
+                        context.drawImage(backgroundImage, i * tileWidth, j * tileHeight);
+                    }
+                }
+            }
         }
     }
 
@@ -192,10 +213,10 @@ function run() {
 
     var fpsmeter = new FPSMeter({
         decimals: 0,
-        graph: true,
-        heat: true,
-        heatOn: 'backgroundColor',
-        theme: 'colorful',
+        graph: false,
+        heat: false,
+        heatOn: 0,
+        theme: 'transparent',
         left: '5px'
     });
 
@@ -233,6 +254,10 @@ window.onload = function () {
     setup();
 }
 
+function toggleFancy() {
+    highQuality = !highQuality;
+}
+
 function resize() {
     context.clearRect(0, 0, width, height);
     context = this.canvas.getContext('2d');
@@ -255,22 +280,22 @@ function getRandomInt(min, max) {
 
 document.onmousedown = function (event) {
 
-    if(event.which == 1){
+    if (event.which == 1) {
         //Left Click
         mouseDown = true;
         lastMouseX = event.x;
         lastMouseY = event.y;
-    
+
         socket.emit('leftmousedown', {
             state: true,
             x: event.x,
             y: event.y
         });
-    } else if(event.which == 3){
+    } else if (event.which == 3) {
         //Right Click
         lastMouseX = event.x;
         lastMouseY = event.y;
-    
+
         socket.emit('rightmousedown', {
             x: event.x,
             y: event.y

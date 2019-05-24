@@ -26,9 +26,6 @@ var tileHeight = c.tileHeight;
 
 console.log(mapWidth + "  " + mapHeight + "  " + tileWidth + "  " + tileHeight);
 
-//Generate the map using the config file
-var map = new Map(mapWidth * tileWidth, mapHeight * tileHeight, c);
-
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2,);
 
@@ -62,7 +59,11 @@ io.sockets.on('connection', function (socket) {
 
     socket.emit('connected', {
         id: socket.id,
-        debug: DEBUG
+        debug: DEBUG,
+        width: mapWidth,
+        height: mapHeight,
+        tileWidth: tileWidth,
+        tileHeight: tileHeight
     });
 
     if (DEBUG) {
@@ -194,8 +195,6 @@ setInterval(function () {
         var player = PLAYER_LIST[p];
         var socket = SOCKET_LIST[player.socket_id]
         socket.emit('updateLocation', player.getInfo());
-
-        socket.emit("map", map.getInfo(player));
 
         var cells = [];
 
