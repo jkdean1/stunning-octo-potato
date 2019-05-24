@@ -19,6 +19,8 @@
     <script src="/client/js/FPSMeter/fpsmeter.js"></script>
     <script src="/client/js/main.js"></script>
 
+    <a href="#" class="qualitySelection">Quality: High</a>
+
     <style>
         html,
         body {
@@ -32,6 +34,35 @@
 
         }
 
+        .qualitySelection {
+            position: fixed;
+            bottom:40px;
+	        right:40px;
+            background-color: #0099ff;
+            -moz-border-radius: 28px;
+            -webkit-border-radius: 28px;
+            border-radius: 28px;
+            border: 1px solid #0099ff;
+            display: inline-block;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+            font-size: 17px;
+            font-weight: bold;
+            padding: 16px 31px;
+            text-decoration: none;
+            text-shadow: 0px 1px 0px #0020b1;
+        }
+
+        .qualitySelection:hover {
+            background-color: #58bcff;
+            border: 1px solid #58bcff;
+        }
+
+        .qualitySelection:active {
+            background-color: #006cb4;
+            border: 1px solid #006cb4;
+        }
     </style>
 </head>
 
