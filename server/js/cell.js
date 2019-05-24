@@ -5,7 +5,9 @@ class Cell {
         //Cells player id
         this.id = id;
         //size
-        this.size = 40;
+        this.size = 20;
+        //mass
+        this.mass = 20;
         //color
         this.color = "blue";
         //Selected or not
@@ -28,6 +30,8 @@ class Cell {
     }
 
     update(blobList) {
+
+        this.size = this.mass;
 
         //If the position and the target are not the same, go to the target.
         if (this.tx != this.x || this.ty != this.y) {
@@ -78,6 +82,7 @@ class Cell {
             y: this.y,
             color: this.color,
             size: this.size,
+            mass: this.mass,
             selected: this.selected
         }
     }

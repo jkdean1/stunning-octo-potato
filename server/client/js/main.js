@@ -120,8 +120,8 @@ function draw(dt) {
                 tempX = i * tileWidth;
                 tempY = j * tileHeight;
 
-                if(tempX > canvasX && tempY > canvasY){
-                    if(tempX < canvasX + width - 100 && tempY < canvasY + height - 100){
+                if(tempX + tileWidth > canvasX && tempY + tileHeight > canvasY){
+                    if(tempX < canvasX + width && tempY < canvasY + height){
                         context.drawImage(backgroundImage, i * tileWidth, j * tileHeight);
                     }
                 }
@@ -136,10 +136,17 @@ function draw(dt) {
             var cell = cells[i];
 
             context.fillStyle = cell.color;
+            context.lineWidth = 2;
+            context.strokeStyle = "black";
             context.beginPath();
             context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
             context.closePath();
             context.fill();
+            context.stroke();
+
+            context.fillStyle = "white";
+            context.textAlign = "center";
+            context.fillText(cell.mass, cell.x, cell.y + cell.mass);
 
             if (cell.selected) {
                 context.strokeStyle = "green";

@@ -24,8 +24,6 @@ var mapHeight = c.mapHeight;
 var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
 
-console.log(mapWidth + "  " + mapHeight + "  " + tileWidth + "  " + tileHeight);
-
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2,);
 
@@ -82,16 +80,12 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
-    cell = new Cell(socket.id, randomX + 100, randomY + 100);
-    cell.color = player.color;
-    CELL_LIST.push(cell);
-
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
     QUADTREE.insert(point);
 
     var blobList = [];
-    BLOB_LIST[socket.id] = blobList; 
+    BLOB_LIST[socket.id] = blobList;
 
     //When the player disconnects
     socket.on('disconnect', function () {
@@ -135,6 +129,11 @@ io.sockets.on('connection', function (socket) {
             player.pressingDown = data.state;
         } else if (data.inputId === 'space') {
             player.pressingSpace = data.state;
+            for(var i in CELL_LIST){
+                if(CELL_LIST[i].id == socket.id){
+                    CELL_LIST[i].mass++;
+                }
+            }
         } else if (data.inputId === 'shift') {
             player.pressingShift = data.state;
         } else if (data.inputId === 'ctrl') {
@@ -245,7 +244,6 @@ setInterval(function () {
         }
 
         socket.emit('blobs', blobs);
-        //console.log(blobs);
 
         player.updatePosition();
     }
