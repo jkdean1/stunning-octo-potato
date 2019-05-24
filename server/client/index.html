@@ -3,21 +3,30 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="/client/styling-main.css">
+
     <link rel="apple-touch-icon" sizes="180x180" href="/client/res/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/client/res/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/client/res/favicon/favicon-16x16.png">
     <link rel="manifest" href="/client/res/favicon/site.webmanifest">
     <link rel="mask-icon" href="/client/res/favicon/safari-pinned-tab.svg" color="#5bbad5">
     <link rel="shortcut icon" href="/client/res/favicon/favicon.ico">
+
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-config" content="/client/res/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
 
-    <canvas id="canvas"></canvas>
-
     <script src="/client/js/socket.io/socket.io.js"></script>
     <script src="/client/js/FPSMeter/fpsmeter.js"></script>
     <script src="/client/js/main.js"></script>
+
+</head>
+
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <input type="button" class="startbutton" onclick="this.style.display='none';startGame()" value="Join Game!">
 
     <div class="QualitySwitch">
         <h2>Fancy Graphics</h2>
@@ -26,104 +35,6 @@
             <span class="slider round"></span>
         </label>
     </div>
-
-    <style>
-        html,
-        body {
-            margin: 0px;
-            overflow: hidden;
-            background-color: rgb(81, 81, 81);
-        }
-
-        canvas {
-            position: absolute;
-            display: block;
-
-        }
-
-        h2 {
-            color: #111;
-            font-family: 'Helvetica Neue', sans-serif;
-            font-size: 15px;
-            margin-bottom: 5%;
-            font-weight: bold;
-            letter-spacing: -1px;
-            line-height: 1;
-            text-align: center;
-        }
-
-        .QualitySwitch {
-            background-color: white;
-            display: inline-block;
-            position: fixed;
-            margin: auto;
-            width: 90px;
-            height: 90px;
-            bottom: 20px;
-            right: 20px;
-            border-radius: 25px;
-            align-content: center;
-        }
-
-        .switch {
-            position: absolute;
-            margin: auto auto auto 0;
-            width: 60px;
-            left: 15px;
-            height: 34px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        input:checked+.slider {
-            background-color: #2196F3;
-        }
-
-        input:checked+.slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
-        }
-
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
-    </style>
-</head>
-
-<body>
 
 </body>
 
