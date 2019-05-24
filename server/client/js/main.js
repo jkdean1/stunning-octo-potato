@@ -244,8 +244,9 @@ function run() {
 
     frame();
 }
+function startGame () {
 
-window.onload = function () {
+//window.onload = function () {
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {
