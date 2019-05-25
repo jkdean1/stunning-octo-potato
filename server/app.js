@@ -76,7 +76,18 @@ io.sockets.on('connection', function (socket) {
     PLAYER_LIST[socket.id] = player;
 
     //Create the players first cell
-    var cell = new Cell(socket.id, randomX, randomY);
+    var randomID = Util.getRandomId();
+    var cell = new Cell(socket.id, randomID, 200, 200);
+    cell.color = player.color;
+    CELL_LIST.push(cell);
+
+    var randomID = Util.getRandomId();
+    var cell = new Cell(socket.id, randomID, randomX + 200, randomY);
+    cell.color = player.color;
+    CELL_LIST.push(cell);
+
+    var randomID = Util.getRandomId();
+    var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
     cell.color = player.color;
     CELL_LIST.push(cell);
 
@@ -156,7 +167,16 @@ io.sockets.on('connection', function (socket) {
 
     //When the player clicks the mouse down.
     socket.on('rightmousedown', function (data) {
-        player.rightclicked(CELL_LIST, BLOB_LIST, data.x, data.y);
+        //player.rightclicked(CELL_LIST, BLOB_LIST, data.x, data.y);
+
+        for(var i in CELL_LIST){
+            var cell = CELL_LIST[i];
+
+            if(cell.selected){
+                cell.vx = 1 * cell.x - (data.x + player.canvasXZero);
+                cell.vy = 1 * cell.y - (data.y + player.canvasYZero);
+            }
+        }
     });
 
     //When the player lets the mouse go. 
@@ -182,6 +202,72 @@ function doCirclesOverlap(x1, y1, r1, x2, y2, r2){
     return Math.abs((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < (r1 + r2) * (r1 + r2);
 }
 
+function getDistance(x1, y1, r1, x2, y2, r2){
+    return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) || 1;
+}
+
+function collider(){
+
+    var collidedParis = [];
+
+    //STATIC RESOLUTION
+    for(var i in CELL_LIST){
+        var cell = CELL_LIST[i];
+
+        //Get nearby Objects for collision
+        var range = new QuadTreeModule.Circle(cell.x, cell.y, cell.size * cell.size);
+        var targets = QUADTREE.query(range);
+
+        //variables that will be used over and over
+        var distance = 0;
+        var overlap = 0;
+
+        //Go through each object in the range and perform collision calculations
+        for(var j in targets){
+            var target = targets[j].data;
+
+            //Check to make sure the cell and the target are not the same
+            if(cell.uniqueID != target.uniqueID){
+                //Check if the objects overlap
+                if(doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)){
+
+                    //Add both cells to the colliding pairs array for dynamic resolution later
+                    collidedParis.push(cell);
+                    collidedParis.push(target);
+
+                    //Calculate the distance and overlap
+                    distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                    overlap = (distance - cell.size - target.size) / 2;
+
+                    //Resolve Cell Collision
+                    cell.x -= overlap * (cell.x - target.x) / distance;
+                    cell.y -= overlap * (cell.y - target.y) / distance;
+
+                    //Resolve Target Collision  
+                    target.x += overlap * (cell.x - target.x) / distance;
+                    target.y += overlap * (cell.y - target.y) / distance;              
+                }
+            }
+        }
+    }
+
+    //DYNAMIC RESOLUTION
+    for(var i = 0; i < collidedParis.length; i += 2){
+        var cell1 = collidedParis[i];
+        var cell2 = collidedParis[i + 1];
+
+
+    }
+
+}
+
+var lastFrameTimeMs = 0;
+var maxFPS = 60;
+
+function loop(){
+
+}
+
 //The current "game loop" -This needs to be updated later to be more functional. 
 setInterval(function () {
 
@@ -199,7 +285,7 @@ setInterval(function () {
 
         for (var c in CELL_LIST) {
             var cell = CELL_LIST[c];
-            cell.update(BLOB_LIST[socket.id]);
+            cell.update();
             cells.push(cell.getInfo());
             var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
             QUADTREE.insert(point);
@@ -218,6 +304,9 @@ setInterval(function () {
             }
         }
 
+        collider();
+
+        /*
         //Deal with colision
         for(var i in CELL_LIST){
             var p = CELL_LIST[i];
@@ -241,7 +330,7 @@ setInterval(function () {
                     }
                 }
             }
-        }
+        }*/
 
         socket.emit('blobs', blobs);
 

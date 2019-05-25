@@ -1,13 +1,15 @@
 var Blob = require('./blob.js');
 
 class Cell {
-    constructor(id, x, y) {
+    constructor(id, uniqueID, x, y) {
         //Cells player id
         this.id = id;
+        //unique id for collision
+        this.uniqueID = uniqueID;
         //size
-        this.size = 20;
+        this.size = 40;
         //mass
-        this.mass = 20;
+        this.mass = 40;
         //color
         this.color = "blue";
         //Selected or not
@@ -16,8 +18,8 @@ class Cell {
         this.x = x;
         this.y = y;
         //Velocity
-        this.vx = 2;
-        this.vy = 2;
+        this.vx = 0;
+        this.vy = 0;
         //Acceleration
         this.ax = 0;
         this.ay = 0;
@@ -29,12 +31,33 @@ class Cell {
         this.counter = this.counterMax;
     }
 
-    update(blobList) {
+    update(dt) {
 
-        this.size = this.mass;
+        if(!dt){
+            dt = 1;
+        }
+
+        //Apply Friction
+        this.ax = -this.vx * 0.8;
+        this.ay = -this.vy * 0.8;
+
+        //Update the velocity with the acceleration
+        this.vx += this.ax * dt;
+        this.vy += this.ay * dt;
+
+        //Update the position with the velocity
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+
+        //Clamp the velocity to 0 if it gets too small
+        if(Math.abs(this.vx * this.vx + this.vy * this.vy) <= 0.01){
+            this.vx = 0;
+            this.vy = 0;
+        }
+
 
         //If the position and the target are not the same, go to the target.
-        if (this.tx != this.x || this.ty != this.y) {
+        /*if (this.tx != this.x || this.ty != this.y) {
 
             var toX = this.tx - this.x;
             var toY = this.ty - this.y;
@@ -53,15 +76,9 @@ class Cell {
             if (Math.abs(this.ty - this.y) < 2) {
                 this.ty = this.y;
             }
-        }
+        }*/
 
-        //update all the blobs
-        for(var i in blobList){
-            var blob = blobList[i];
-            blob.update();
-        }
-
-        if(this.counter <= 0){
+        /*if(this.counter <= 0){
             this.counter = this.counterMax;
             var b = new Blob(this.id, this.x, this.y, this.color);
             var angle = Math.random() * Math.PI * 2;
@@ -71,7 +88,7 @@ class Cell {
             b.tx = this.x + newX;
             b.ty = this.y + newY;
             blobList.push(b);
-        }
+        }*/
 
         this.counter--;
     }

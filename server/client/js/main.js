@@ -142,7 +142,6 @@ function draw(dt) {
             context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
             context.closePath();
             context.fill();
-            context.stroke();
 
             context.fillStyle = "white";
             context.textAlign = "center";

@@ -6,5 +6,6 @@
     "mapWidth": 50,
     "mapHeight": 50,
     "tileWidth": 128, 
-    "tileHeight": 128
+    "tileHeight": 128,
+    "friction": 0.8
 }
