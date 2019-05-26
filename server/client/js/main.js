@@ -1,5 +1,5 @@
 //Global Variables
-var socket = io({transports: ['websocket']});
+var socket = io("", {transports: ['websocket']});
 var ID;
 var DEBUG = false;
 
