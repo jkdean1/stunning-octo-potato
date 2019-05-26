@@ -34,6 +34,10 @@ var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
 
+
+var pulser = 0
+var breather = 1;
+
 //Cell variables
 var cells = [];
 var blobs = [];
@@ -112,6 +116,7 @@ function draw(dt) {
     var tempX = 0;
     var tempY = 0;
 
+
     if (highQuality) {
         //Draw Background
         for (var i = 0; i < mapWidth; i++) {
@@ -132,12 +137,29 @@ function draw(dt) {
     context.fillStyle = "black";
     //Draw the cells
     if (cells) {
+        if(breather == 1){
+	  pulser++;
+          if (pulser >= 60) { breather = 0;}
+        } else if ( breather == 0){
+          pulser--;
+          if (pulser <= 0) { breather = 1;}
+        } 
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
 
+            var grd = context.createRadialGradient(cell.x,cell.y,cell.size,cell.x,cell.y,cell.size*1.5+5*(pulser/30));
+            grd.addColorStop(0,cell.color);
+            var roughcolor = cell.color.match(/\d+/g);
+            var color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
+            grd.addColorStop(1,color);
+            context.fillStyle = grd;
+            context.beginPath();
+            context.arc(cell.x, cell.y, cell.size*3, 0, Math.PI * 2);
+            context.closePath();
+            context.fill();
             context.fillStyle = cell.color;
             context.lineWidth = 2;
-            context.strokeStyle = "black";
+            context.strokeStyle = cell.color;
             context.beginPath();
             context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
             context.closePath();
@@ -145,6 +167,8 @@ function draw(dt) {
 
             if (highQuality) {
                 context.stroke();
+
+		
             }
 
             //context.fillStyle = "white";
@@ -153,7 +177,7 @@ function draw(dt) {
 
             if (cell.selected) {
                 context.strokeStyle = "green";
-                context.lineWidth = 3;
+                context.lineWidth = 1.5;
                 context.stroke();
             }
 
