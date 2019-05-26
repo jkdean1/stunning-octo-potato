@@ -114,14 +114,14 @@ function draw(dt) {
 
     if (highQuality) {
         //Draw Background
-        for(var i = 0; i < mapWidth; i++){
-            for(var j = 0; j < mapHeight; j++){
+        for (var i = 0; i < mapWidth; i++) {
+            for (var j = 0; j < mapHeight; j++) {
 
                 tempX = i * tileWidth;
                 tempY = j * tileHeight;
 
-                if(tempX + tileWidth > canvasX && tempY + tileHeight > canvasY){
-                    if(tempX < canvasX + width && tempY < canvasY + height){
+                if (tempX + tileWidth > canvasX && tempY + tileHeight > canvasY) {
+                    if (tempX < canvasX + width && tempY < canvasY + height) {
                         context.drawImage(backgroundImage, i * tileWidth, j * tileHeight);
                     }
                 }
@@ -143,33 +143,17 @@ function draw(dt) {
             context.closePath();
             context.fill();
 
-            context.fillStyle = "white";
-            context.textAlign = "center";
-            context.fillText(cell.mass, cell.x, cell.y + cell.mass);
+            if (highQuality) {
+                context.stroke();
+            }
+
+            //context.fillStyle = "white";
+            //context.textAlign = "center";
+            //context.fillText(cell.mass, cell.x, cell.y + cell.mass);
 
             if (cell.selected) {
                 context.strokeStyle = "green";
                 context.lineWidth = 3;
-                context.stroke();
-            }
-
-        }
-    }
-
-    //draw the blobs
-    if (blobs) {
-        for (var i = 0; i < blobs.length; i++) {
-            var blob = blobs[i];
-
-            context.fillStyle = blob.color;
-            context.beginPath();
-            context.arc(blob.x, blob.y, blob.size, 0, Math.PI * 2);
-            context.closePath();
-            context.fill();
-
-            if (blob.selected) {
-                context.strokeStyle = "green";
-                context.lineWidth = 1;
                 context.stroke();
             }
 
@@ -190,15 +174,17 @@ function draw(dt) {
     context.strokeStyle = "black";
     context.lineWidth = 1;
 
-    //Draw the dot with coordinates in the middle of the screen
-    if (DEBUG) {
-        context.fillStyle = "white";
-        context.beginPath();
-        context.arc(x, y, 4, 0, Math.PI * 2);
-        context.closePath();
-        context.fill();
-        context.textAlign = 'center';
-        context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+    if (highQuality) {
+        //Draw the dot with coordinates in the middle of the screen
+        if (DEBUG) {
+            context.fillStyle = "white";
+            context.beginPath();
+            context.arc(x, y, 4, 0, Math.PI * 2);
+            context.closePath();
+            context.fill();
+            context.textAlign = 'center';
+            context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+        }
     }
 }
 
@@ -243,9 +229,10 @@ function run() {
 
     frame();
 }
-function startGame () {
 
-//window.onload = function () {
+function startGame() {
+
+    //window.onload = function () {
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {

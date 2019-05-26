@@ -24,6 +24,8 @@ var mapHeight = c.mapHeight;
 var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
 
+var maxCells = 200;
+
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
 
@@ -81,10 +83,10 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
-    var randomID = Util.getRandomId();
-    var cell = new Cell(socket.id, randomID, randomX + 200, randomY);
-    cell.color = player.color;
-    CELL_LIST.push(cell);
+    //var randomID = Util.getRandomId();
+    //var cell = new Cell(socket.id, randomID, randomX + 200, randomY);
+    //cell.color = player.color;
+    //CELL_LIST.push(cell);
 
     var randomID = Util.getRandomId();
     var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
@@ -163,10 +165,10 @@ io.sockets.on('connection', function (socket) {
         player.mouseSelectFirstX = data.x;
         player.mouseSelectFirstY = data.y;
 
-        for(var i in CELL_LIST){
+        for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
 
-            if(cell.selected){
+            if (cell.selected) {
                 cell.tx = data.x + player.canvasXZero;
                 cell.ty = data.y + player.canvasYZero;
                 cell.target = true;
@@ -194,12 +196,8 @@ io.sockets.on('connection', function (socket) {
         player.mouseSelectSecondX = data.x;
         player.mouseSelectSecondY = data.y;
 
-        for (var i in BLOB_LIST) {
-            var blobi = BLOB_LIST[i]
-            for (var j in blobi) {
-                var b = blobi[j];
-                b.selected = false;
-            }
+        if(player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY){
+            Selector(player);
         }
 
         player.clicked(CELL_LIST, BLOB_LIST);
@@ -214,6 +212,28 @@ function getDistance(x1, y1, r1, x2, y2, r2) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) || 1;
 }
 
+function Selector(p) {
+    var x1 = p.mouseSelectFirstX + p.canvasXZero;
+    var y1 = p.mouseSelectFirstY + p.canvasYZero;
+    var x2 = p.mouseSelectSecondX + p.canvasXZero;
+    var y2 = p.mouseSelectSecondY + p.canvasYZero;
+
+    var range = new QuadTreeModule.Rectangle(x1, y1, x2, y2);
+    var targets = QUADTREE.query(range);
+
+    for (var i in targets) {
+        var cell = targets[i].data;
+        if(cell.id == p.socket_id){
+            if (cell.type == 0) {
+
+                if(cell.x > x1 && cell.x < x2 && cell.y > y1 && cell.y < y2){
+                    cell.selected = true;
+                }
+            }
+        }
+    }
+}
+
 function collider() {
 
     var collidedParis = [];
@@ -221,6 +241,7 @@ function collider() {
     //STATIC RESOLUTION
     for (var i in CELL_LIST) {
         var cell = CELL_LIST[i];
+        var cellType = cell.type;
 
         //Get nearby Objects for collision
         var range = new QuadTreeModule.Circle(cell.x, cell.y, cell.size * cell.size);
@@ -233,27 +254,75 @@ function collider() {
         //Go through each object in the range and perform collision calculations
         for (var j in targets) {
             var target = targets[j].data;
+            var targetType = target.type;
 
             //Check to make sure the cell and the target are not the same
             if (cell.uniqueID != target.uniqueID) {
-                //Check if the objects overlap
-                if (doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
-                    //Add both cells to the colliding pairs array for dynamic resolution later
-                    collidedParis.push(cell);
-                    collidedParis.push(target);
+                //Go through each type of cell
+                if (cellType == 1 && targetType == 1) {
+                    //They are both generating cells, so do normal collision
 
-                    //Calculate the distance and overlap
-                    distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
-                    overlap = (distance - cell.size - target.size) / 2;
+                    //Check if the objects overlap
+                    if (doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
-                    //Resolve Cell Collision
-                    cell.x -= overlap * (cell.x - target.x) / distance;
-                    cell.y -= overlap * (cell.y - target.y) / distance;
+                        //Add both cells to the colliding pairs array for dynamic resolution later
+                        collidedParis.push(cell);
+                        collidedParis.push(target);
 
-                    //Resolve Target Collision  
-                    target.x += overlap * (cell.x - target.x) / distance;
-                    target.y += overlap * (cell.y - target.y) / distance;
+                        //Calculate the distance and overlap
+                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        overlap = (distance - cell.size - target.size) / 2;
+
+                        //Resolve Cell Collision
+                        cell.x -= overlap * (cell.x - target.x) / distance;
+                        cell.y -= overlap * (cell.y - target.y) / distance;
+
+                        //Resolve Target Collision  
+                        target.x += overlap * (cell.x - target.x) / distance;
+                        target.y += overlap * (cell.y - target.y) / distance;
+                    }
+                } else if (cellType == 1 && targetType == 0) {
+                    if (cell.id != target.id) {
+                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        if (distance < cell.size + target.size) {
+                            target.valid = false;
+                            cell.size--;
+
+                            if (cell.size == 1) {
+                                cell.size = 1;
+                                cell.valid = false;
+                            }
+                        }
+                    }
+                } else if (cellType == 0 && targetType == 0) {
+                    if (cell.id != target.id) {
+                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        if (distance < cell.size + target.size) {
+                            target.valid = false;
+                            cell.valid = false;
+                        }
+                    } else {
+                        //Check if the objects overlap
+                        if (doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
+
+                            //Add both cells to the colliding pairs array for dynamic resolution later
+                            collidedParis.push(cell);
+                            collidedParis.push(target);
+
+                            //Calculate the distance and overlap
+                            distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                            overlap = (distance - cell.size - target.size) / 2;
+
+                            //Resolve Cell Collision
+                            cell.x -= overlap * (cell.x - target.x) / distance;
+                            cell.y -= overlap * (cell.y - target.y) / distance;
+
+                            //Resolve Target Collision  
+                            target.x += overlap * (cell.x - target.x) / distance;
+                            target.y += overlap * (cell.y - target.y) / distance;
+                        }
+                    }
                 }
             }
         }
@@ -303,7 +372,7 @@ function tick(dt) {
     QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
 
     //For every player in the PLAYER_LIST
-    for(var p in PLAYER_LIST){
+    for (var p in PLAYER_LIST) {
         var player = PLAYER_LIST[p];
         var socket = SOCKET_LIST[player.socket_id];
 
@@ -316,11 +385,36 @@ function tick(dt) {
         //loop through all the cells
         for (var c in CELL_LIST) {
             var cell = CELL_LIST[c];
+            var cellType = cell.type;
             cell.update(dt);
-            cells.push(cell.getInfo());
+            if (cell.valid) {
+                cells.push(cell.getInfo());
+            }
             //Add the cells to the quadtree
             var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
             QUADTREE.insert(point);
+
+            //if there are not too many cells...
+            if (CELL_LIST.length < maxCells) {
+                //Add a new cell if it is time
+                if (cellType == 1) {
+                    if (cell.counter == 0) {
+                        var randomDistance = Util.getRandomInt(20, 50);
+                        var randomID = Util.getRandomId();
+                        var temp = new Cell(cell.id, randomID, cell.x, cell.y);
+                        var randomAngle = Math.random() * Math.PI * 2;
+                        temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
+                        temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
+                        temp.target = true;
+                        temp.color = player.color;
+                        temp.size = 5;
+                        temp.type = 0;
+                        CELL_LIST.push(temp);
+
+                        console.log(CELL_LIST.length);
+                    }
+                }
+            }
         }
 
         socket.emit('cells', cells);
@@ -328,6 +422,17 @@ function tick(dt) {
         //Update the player
         player.updatePosition();
     }
+
+    var temp = [];
+    for(var i in CELL_LIST){
+        var cell = CELL_LIST[i];
+        if(cell.valid){
+            temp.push(cell);
+        }
+    }
+
+    CELL_LIST.length = 0;
+    CELL_LIST = temp;
 
 }
 
@@ -351,7 +456,7 @@ setInterval(function (argument) {
     hrend = process.hrtime(hrstart);
 
     //grab the current time
-    if(DEBUG){
+    if (DEBUG) {
         startTime = process.hrtime()[1];
     }
 
