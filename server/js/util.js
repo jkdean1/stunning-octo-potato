@@ -12,6 +12,10 @@ class Util {
 
         return hue;
     }
+
+    static map(value, inMin, inMax, outMin, outMax){
+        return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
 }
 
 module.exports = Util;

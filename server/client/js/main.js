@@ -8,7 +8,14 @@ var canvas;
 var context;
 var width;
 var height;
+
+var mapWidth;
+var mapHeight;
+var tileWidth;
+var tileheight;
+
 var mouseDown = false;
+var highQuality = true;
 
 //containers
 var players = [];
@@ -25,8 +32,11 @@ var currMouseY = 0;
 var map;
 var circles;
 var backgroundImage = new Image();
-//backgroundImage.src = 'client/res/img/maybe_tileable.jpg';
-backgroundImage.src = 'client/res/img/tile1.jpg';
+backgroundImage.src = 'client/res/img/tile2.jpg';
+
+
+var pulser = 0
+var breather = 1;
 
 //Cell variables
 var cells = [];
@@ -36,6 +46,10 @@ socket.on('connected', function (data) {
 
     ID = data.id;
     DEBUG = data.debug;
+    mapWidth = data.width;
+    mapHeight = data.height;
+    tileWidth = data.tileWidth;
+    tileHeight = data.tileHeight;
 
     if (DEBUG) {
         console.log("Connected, Your ID: " + ID);
@@ -99,50 +113,71 @@ function draw(dt) {
     //Reset the fillStyle
     context.fillStyle = "black";
 
-    //Draw Background
-    if (map) {
-        for (var i = 0; i < map.length; i++) {
-            context.fillStyle = map[i].color;
-            context.fillRect(map[i].x, map[i].y, map[i].width, map[i].height);
-            context.drawImage(backgroundImage, map[i].x, map[i].y);
+    var tempX = 0;
+    var tempY = 0;
+
+
+    if (highQuality) {
+        //Draw Background
+        for (var i = 0; i < mapWidth; i++) {
+            for (var j = 0; j < mapHeight; j++) {
+
+                tempX = i * tileWidth;
+                tempY = j * tileHeight;
+
+                if (tempX + tileWidth > canvasX && tempY + tileHeight > canvasY) {
+                    if (tempX < canvasX + width && tempY < canvasY + height) {
+                        context.drawImage(backgroundImage, i * tileWidth, j * tileHeight);
+                    }
+                }
+            }
         }
     }
 
     context.fillStyle = "black";
     //Draw the cells
     if (cells) {
+        if(breather == 1){
+	  pulser++;
+          if (pulser >= 60) { breather = 0;}
+        } else if ( breather == 0){
+          pulser--;
+          if (pulser <= 0) { breather = 1;}
+        } 
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
 
+            var grd = context.createRadialGradient(cell.x,cell.y,cell.size,cell.x,cell.y,cell.size*1.5+5*(pulser/30));
+            grd.addColorStop(0,cell.color);
+            var roughcolor = cell.color.match(/\d+/g);
+            var color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
+            grd.addColorStop(1,color);
+            context.fillStyle = grd;
+            context.beginPath();
+            context.arc(cell.x, cell.y, cell.size*3, 0, Math.PI * 2);
+            context.closePath();
+            context.fill();
             context.fillStyle = cell.color;
+            context.lineWidth = 2;
+            context.strokeStyle = cell.color;
             context.beginPath();
             context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
             context.closePath();
             context.fill();
 
-            if (cell.selected) {
-                context.strokeStyle = "green";
-                context.lineWidth = 3;
+            if (highQuality) {
                 context.stroke();
+
+		
             }
 
-        }
-    }
+            //context.fillStyle = "white";
+            //context.textAlign = "center";
+            //context.fillText(cell.mass, cell.x, cell.y + cell.mass);
 
-    //draw the blobs
-    if (blobs) {
-        for (var i = 0; i < blobs.length; i++) {
-            var blob = blobs[i];
-
-            context.fillStyle = blob.color;
-            context.beginPath();
-            context.arc(blob.x, blob.y, blob.size, 0, Math.PI * 2);
-            context.closePath();
-            context.fill();
-
-            if (blob.selected) {
+            if (cell.selected) {
                 context.strokeStyle = "green";
-                context.lineWidth = 1;
+                context.lineWidth = 1.5;
                 context.stroke();
             }
 
@@ -163,15 +198,17 @@ function draw(dt) {
     context.strokeStyle = "black";
     context.lineWidth = 1;
 
-    //Draw the dot with coordinates in the middle of the screen
-    if (DEBUG) {
-        context.fillStyle = "white";
-        context.beginPath();
-        context.arc(x, y, 4, 0, Math.PI * 2);
-        context.closePath();
-        context.fill();
-        context.textAlign = 'center';
-        context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+    if (highQuality) {
+        //Draw the dot with coordinates in the middle of the screen
+        if (DEBUG) {
+            context.fillStyle = "white";
+            context.beginPath();
+            context.arc(x, y, 4, 0, Math.PI * 2);
+            context.closePath();
+            context.fill();
+            context.textAlign = 'center';
+            context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+        }
     }
 }
 
@@ -192,10 +229,10 @@ function run() {
 
     var fpsmeter = new FPSMeter({
         decimals: 0,
-        graph: true,
-        heat: true,
-        heatOn: 'backgroundColor',
-        theme: 'colorful',
+        graph: false,
+        heat: false,
+        heatOn: 0,
+        theme: 'transparent',
         left: '5px'
     });
 
@@ -217,7 +254,9 @@ function run() {
     frame();
 }
 
-window.onload = function () {
+function startGame() {
+
+    //window.onload = function () {
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {
@@ -231,6 +270,10 @@ window.onload = function () {
     document.addEventListener('contextmenu', event => event.preventDefault());
 
     setup();
+}
+
+function toggleFancy() {
+    highQuality = !highQuality;
 }
 
 function resize() {
@@ -255,22 +298,22 @@ function getRandomInt(min, max) {
 
 document.onmousedown = function (event) {
 
-    if(event.which == 1){
+    if (event.which == 1) {
         //Left Click
         mouseDown = true;
         lastMouseX = event.x;
         lastMouseY = event.y;
-    
+
         socket.emit('leftmousedown', {
             state: true,
             x: event.x,
             y: event.y
         });
-    } else if(event.which == 3){
+    } else if (event.which == 3) {
         //Right Click
         lastMouseX = event.x;
         lastMouseY = event.y;
-    
+
         socket.emit('rightmousedown', {
             x: event.x,
             y: event.y

@@ -3,39 +3,38 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="/client/styling-main.css">
+
     <link rel="apple-touch-icon" sizes="180x180" href="/client/res/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/client/res/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/client/res/favicon/favicon-16x16.png">
     <link rel="manifest" href="/client/res/favicon/site.webmanifest">
     <link rel="mask-icon" href="/client/res/favicon/safari-pinned-tab.svg" color="#5bbad5">
     <link rel="shortcut icon" href="/client/res/favicon/favicon.ico">
+
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-config" content="/client/res/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
-
-    <canvas id="canvas"></canvas>
 
     <script src="/client/js/socket.io/socket.io.js"></script>
     <script src="/client/js/FPSMeter/fpsmeter.js"></script>
     <script src="/client/js/main.js"></script>
 
-    <style>
-        html,
-        body {
-            margin: 0px;
-            overflow: hidden;
-        }
-
-        canvas {
-            position: absolute;
-            display: block;
-
-        }
-
-    </style>
 </head>
 
+
 <body>
+    <canvas id="canvas"></canvas>
+
+    <input type="button" class="startbutton" onclick="this.style.display='none';startGame()" value="Join Game!">
+
+    <div class="QualitySwitch">
+        <h2>Fancy Graphics</h2>
+        <label class="switch" >
+            <input type="checkbox" checked onclick="toggleFancy()">
+            <span class="slider round"></span>
+        </label>
+    </div>
 
 </body>
 

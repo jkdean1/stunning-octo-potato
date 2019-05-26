@@ -1,11 +1,22 @@
 var Blob = require('./blob.js');
+var Util = require('./util.js');
 
 class Cell {
-    constructor(id, x, y) {
+    constructor(id, uniqueID, x, y) {
         //Cells player id
         this.id = id;
+        //unique id for collision
+        this.uniqueID = uniqueID;
+        //Type of cell either 1 or 0
+        this.type = 1;
+        //valid or not
+        this.valid = true;
         //size
         this.size = 40;
+        //mass
+        this.mass = this.size * 2;
+        //max speed
+        this.maxSpeed = 2000;
         //color
         this.color = "blue";
         //Selected or not
@@ -14,62 +25,81 @@ class Cell {
         this.x = x;
         this.y = y;
         //Velocity
-        this.vx = 2;
-        this.vy = 2;
+        this.vx = 0;
+        this.vy = 0;
         //Acceleration
         this.ax = 0;
         this.ay = 0;
         //target position
         this.tx = this.x;
         this.ty = this.y;
+        //target aquired
+        this.target = false;
 
         this.counterMax = 100;
         this.counter = this.counterMax;
     }
 
-    update(blobList) {
+    update(dt) {
 
-        //If the position and the target are not the same, go to the target.
-        if (this.tx != this.x || this.ty != this.y) {
+        dt = dt || 0;
 
-            var toX = this.tx - this.x;
-            var toY = this.ty - this.y;
+        if (this.target) {
+            var ar = this.arrive();
 
-            var toLength = Math.sqrt(toX * toX + toY * toY);
-            toX = toX / toLength;
-            toY = toY / toLength;
+            this.ax += ar[0];
+            this.ay += ar[1];
 
-            this.x += toX * this.vx;
-            this.y += toY * this.vy;
+            //Apply Friction
+            this.ax += -this.vx * 2;
+            this.ay += -this.vy * 2;
 
-            if (Math.abs(this.tx - this.x) < 2) {
-                this.tx = this.x;
+            //Update Velocity
+            this.vx += this.ax * dt;
+            this.vy += this.ay * dt;
+
+            //Update the position with the velocity
+            this.x += (this.vx * dt);
+            this.y += (this.vy * dt);
+
+            //Clamp the velocity to 0 if it gets too small
+            if (Math.abs(this.vx * this.vx + this.vy * this.vy) <= 0.5) {
+                this.vx = 0;
+                this.vy = 0;
             }
 
-            if (Math.abs(this.ty - this.y) < 2) {
-                this.ty = this.y;
-            }
+            this.ax = 0;
+            this.ay = 0;
         }
 
-        //update all the blobs
-        for(var i in blobList){
-            var blob = blobList[i];
-            blob.update();
-        }
-
-        if(this.counter <= 0){
+        if(this.counter < 0){
             this.counter = this.counterMax;
-            var b = new Blob(this.id, this.x, this.y, this.color);
-            var angle = Math.random() * Math.PI * 2;
-            var randomOffset = Math.random() * 30 + 20;
-            var newX = (this.size + randomOffset) * Math.cos(angle);
-            var newY = (this.size + randomOffset) * Math.sin(angle);
-            b.tx = this.x + newX;
-            b.ty = this.y + newY;
-            blobList.push(b);
-        }
+        } 
 
         this.counter--;
+    }
+
+    arrive() {
+        //Desired
+        var desiredX = this.tx - this.x;
+        var desiredY = this.ty - this.y;
+
+        var d = Math.sqrt(desiredX * desiredX + desiredY * desiredY);
+        var speed = this.maxSpeed;
+        if (d < 500) {
+            speed = Util.map(d, 0, 500, 0, this.maxSpeed);
+        }
+
+        desiredX = desiredX * speed / d;
+        desiredY = desiredY * speed / d;
+
+        var steerX = desiredX - this.vx;
+        var steerY = desiredY - this.vy;
+
+        steerX = Math.min(steerX, this.maxSpeed);
+        steerY = Math.min(steerY, this.maxSpeed);
+
+        return [steerX, steerY];
     }
 
     getInfo() {
@@ -78,6 +108,7 @@ class Cell {
             y: this.y,
             color: this.color,
             size: this.size,
+            mass: this.mass,
             selected: this.selected
         }
     }
