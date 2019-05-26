@@ -1,5 +1,6 @@
 //Global Variables
-var socket = io("wss://io.thorjhanson.com/socket.io/", {transports: ['websocket']});
+var socket = io.connect("https://io.thorjhanson.com/");
+//var socket = io();
 var ID;
 var DEBUG = false;
 
