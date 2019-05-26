@@ -411,7 +411,7 @@ function tick(dt) {
                         temp.type = 0;
                         CELL_LIST.push(temp);
 
-                        console.log(CELL_LIST.length);
+                        //console.log(CELL_LIST.length);
                     }
                 }
             }
