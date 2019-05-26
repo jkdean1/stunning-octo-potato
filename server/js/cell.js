@@ -104,6 +104,7 @@ class Cell {
 
     getInfo() {
         return {
+            id: this.id,
             x: this.x,
             y: this.y,
             color: this.color,
