@@ -406,8 +406,9 @@ function tick(dt) {
                         temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
-                        console.log(temp.color + "   " + cell.color);
+                        
                         temp.color = cell.color;
+                        console.log(temp.color + "   " + cell.color);
                         temp.size = 5;
                         temp.type = 0;
                         CELL_LIST.push(temp);
