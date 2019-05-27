@@ -12,7 +12,7 @@ class Cell {
         //valid or not
         this.valid = true;
         //size
-        this.size = 40;
+        this.size = 20;
         //mass
         this.mass = this.size * 2;
         //max speed
