@@ -26,16 +26,18 @@
 <body>
     <canvas id="canvas"></canvas>
 
-    <input type="button" class="startbutton" onclick="this.style.display='none';startGame()" value="Join Game!">
+    <div id="landingDiv">
 
-    <div class="QualitySwitch">
-        <h2>Fancy Graphics</h2>
-        <label class="switch" >
-            <input type="checkbox" checked onclick="toggleFancy()">
-            <span class="slider round"></span>
-        </label>
+        <input type="button" class="startbutton" onclick="startGame();document.getElementById('landingDiv').style.display='none';" value="Join Game!">
+        <div class="QualitySwitch">
+            <h2>Fancy Graphics</h2>
+            <label class="switch" >
+                <input type="checkbox" checked onclick="toggleFancy()">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
     </div>
-
 </body>
 
 </html>
