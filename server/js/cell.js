@@ -40,7 +40,7 @@ class Cell {
         this.counter = this.counterMax;
     }
 
-    update(dt) {
+    update(dt, mapWidth, mapHeight) {
 
         dt = dt || 0;
 
@@ -66,6 +66,23 @@ class Cell {
             if (Math.abs(this.vx * this.vx + this.vy * this.vy) <= 0.5) {
                 this.vx = 0;
                 this.vy = 0;
+            }
+
+            //Clamp the position so it doesn't go outside the map...
+            if(this.x - this.size <= 0)
+            {
+                this.x = this.size;
+            }
+            if(this.y - this.size <= 0)
+            {
+                this.y = this.size;
+            }
+            if(this.x + this.size >= mapWidth)
+            {
+                this.x = mapWidth - this.size;
+            }
+            if(this.y + this.size >= mapHeight){
+                this.y = mapHeight - this.size;
             }
 
             this.ax = 0;

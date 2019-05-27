@@ -83,16 +83,6 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
-    //var randomID = Util.getRandomId();
-    //var cell = new Cell(socket.id, randomID, randomX + 200, randomY);
-    //cell.color = player.color;
-    //CELL_LIST.push(cell);
-
-    //var randomID = Util.getRandomId();
-    //var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
-    //cell.color = player.color;
-    //CELL_LIST.push(cell);
-
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
     QUADTREE.insert(point);
@@ -386,7 +376,7 @@ function tick(dt) {
         for (var c in CELL_LIST) {
             var cell = CELL_LIST[c];
             var cellType = cell.type;
-            cell.update(dt);
+            cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
             if (cell.valid) {
                 cells.push(cell.getInfo());
             }
