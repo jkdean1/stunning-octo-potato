@@ -24,7 +24,7 @@ var mapHeight = c.mapHeight;
 var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
 
-var maxCells = 200;
+var maxCells = 400;
 
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
@@ -79,7 +79,7 @@ io.sockets.on('connection', function (socket) {
 
     //Create the players first cell
     var randomID = Util.getRandomId();
-    var cell = new Cell(socket.id, randomID, 200, 200);
+    var cell = new Cell(socket.id, randomID, randomX, randomY);
     cell.color = player.color;
     CELL_LIST.push(cell);
 
@@ -88,10 +88,10 @@ io.sockets.on('connection', function (socket) {
     //cell.color = player.color;
     //CELL_LIST.push(cell);
 
-    var randomID = Util.getRandomId();
-    var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
-    cell.color = player.color;
-    CELL_LIST.push(cell);
+    //var randomID = Util.getRandomId();
+    //var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
+    //cell.color = player.color;
+    //CELL_LIST.push(cell);
 
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
@@ -168,7 +168,7 @@ io.sockets.on('connection', function (socket) {
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
 
-            if (cell.selected) {
+            if (cell.selected && cell.id == socket.id) {
                 cell.tx = data.x + player.canvasXZero;
                 cell.ty = data.y + player.canvasYZero;
                 cell.target = true;
@@ -406,12 +406,10 @@ function tick(dt) {
                         temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
-                        temp.color = player.color;
+                        temp.color = cell.color;
                         temp.size = 5;
                         temp.type = 0;
                         CELL_LIST.push(temp);
-
-                        //console.log(CELL_LIST.length);
                     }
                 }
             }
