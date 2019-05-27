@@ -186,7 +186,7 @@ io.sockets.on('connection', function (socket) {
         player.mouseSelectSecondX = data.x;
         player.mouseSelectSecondY = data.y;
 
-        if(player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY){
+        if (player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY) {
             Selector(player);
         }
 
@@ -213,12 +213,9 @@ function Selector(p) {
 
     for (var i in targets) {
         var cell = targets[i].data;
-        if(cell.id == p.socket_id){
-            if (cell.type == 0) {
-
-                if(cell.x > x1 && cell.x < x2 && cell.y > y1 && cell.y < y2){
-                    cell.selected = true;
-                }
+        if (cell.id == p.socket_id) {
+            if (cell.x > x1 && cell.x < x2 && cell.y > y1 && cell.y < y2) {
+                cell.selected = true;
             }
         }
     }
@@ -397,7 +394,7 @@ function tick(dt) {
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
                         temp.color = cell.color;
-                        temp.size = 5;
+                        temp.size = 3;
                         temp.type = 0;
                         CELL_LIST.push(temp);
                     }
@@ -412,9 +409,9 @@ function tick(dt) {
     }
 
     var temp = [];
-    for(var i in CELL_LIST){
+    for (var i in CELL_LIST) {
         var cell = CELL_LIST[i];
-        if(cell.valid){
+        if (cell.valid) {
             temp.push(cell);
         }
     }
