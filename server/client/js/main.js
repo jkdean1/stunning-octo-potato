@@ -36,9 +36,8 @@ var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
 
-
-var pulser = 0
-var breather = 1;
+// Variables for controlling visual effects
+var pulser = 0;
 
 //Cell variables
 var cells = [];
@@ -140,19 +139,8 @@ function draw(dt) {
     //Draw the cells
     if (cells) {
 
-        if (highQuality) {
-            if (breather == 1) {
-                pulser++;
-                if (pulser >= 60) {
-                    breather = 0;
-                }
-            } else if (breather == 0) {
-                pulser--;
-                if (pulser <= 0) {
-                    breather = 1;
-                }
-            }
-        }
+        pulser++;
+        if (pulser >= 60){ pulser = 0;}
 
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
@@ -163,8 +151,16 @@ function draw(dt) {
                 var roughcolor = cell.color.match(/\d+/g);
                 color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
 
-                //Create the gradient
-                var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 1 * (pulser / 30));
+                //Create the gradient pulse
+                var offsetBlur = pulser+(i%60);
+                if (offsetBlur>=60){
+                    offsetBlur = offsetBlur-60;
+                }
+                if (offsetBlur >= 31){
+                    offsetBlur = 60 - offsetBlur;
+                }
+                // Implement the gradient
+                var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2*(offsetBlur / 30));
                 grd.addColorStop(0, cell.color);
                 grd.addColorStop(1, color);
 
