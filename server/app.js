@@ -158,10 +158,12 @@ io.sockets.on('connection', function (socket) {
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
 
-            if (cell.selected && cell.id == socket.id) {
-                cell.tx = data.x + player.canvasXZero;
-                cell.ty = data.y + player.canvasYZero;
-                cell.target = true;
+            if(cell.id == socket.id){
+                if (cell.selected) {
+                    cell.tx = data.x + player.canvasXZero;
+                    cell.ty = data.y + player.canvasYZero;
+                    cell.target = true;
+                }
             }
         }
     });

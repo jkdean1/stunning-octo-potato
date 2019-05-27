@@ -94,6 +94,8 @@ class Cell {
         } 
 
         this.counter--;
+
+        
     }
 
     arrive() {
