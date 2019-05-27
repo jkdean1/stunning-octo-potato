@@ -168,14 +168,10 @@ io.sockets.on('connection', function (socket) {
 
     //When the player clicks the mouse down.
     socket.on('rightmousedown', function (data) {
-        //player.rightclicked(CELL_LIST, BLOB_LIST, data.x, data.y);
-
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
-
-            if (cell.selected) {
-                cell.vx = 1 * cell.x - (data.x + player.canvasXZero);
-                cell.vy = 1 * cell.y - (data.y + player.canvasYZero);
+            if(cell.id == socket.id){
+                cell.selected = false;
             }
         }
     });
@@ -364,7 +360,7 @@ function tick(dt) {
         var socket = SOCKET_LIST[player.socket_id];
 
         //Update the players location on there screen
-        socket.emit('updateLocation', player.getInfo());
+        socket.volatile.emit('updateLocation', player.getInfo());
 
         //array to package the cells into
         var cells = [];
@@ -402,7 +398,7 @@ function tick(dt) {
             }
         }
 
-        socket.emit('cells', cells);
+        socket.volatile.emit('cells', cells);
 
         //Update the player
         player.updatePosition();
