@@ -83,16 +83,6 @@ io.sockets.on('connection', function (socket) {
     cell.color = player.color;
     CELL_LIST.push(cell);
 
-    //var randomID = Util.getRandomId();
-    //var cell = new Cell(socket.id, randomID, randomX + 200, randomY);
-    //cell.color = player.color;
-    //CELL_LIST.push(cell);
-
-    //var randomID = Util.getRandomId();
-    //var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
-    //cell.color = player.color;
-    //CELL_LIST.push(cell);
-
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
     QUADTREE.insert(point);
@@ -178,14 +168,10 @@ io.sockets.on('connection', function (socket) {
 
     //When the player clicks the mouse down.
     socket.on('rightmousedown', function (data) {
-        //player.rightclicked(CELL_LIST, BLOB_LIST, data.x, data.y);
-
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
-
-            if (cell.selected) {
-                cell.vx = 1 * cell.x - (data.x + player.canvasXZero);
-                cell.vy = 1 * cell.y - (data.y + player.canvasYZero);
+            if(cell.id == socket.id){
+                cell.selected = false;
             }
         }
     });
@@ -196,7 +182,7 @@ io.sockets.on('connection', function (socket) {
         player.mouseSelectSecondX = data.x;
         player.mouseSelectSecondY = data.y;
 
-        if(player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY){
+        if (player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY) {
             Selector(player);
         }
 
@@ -223,12 +209,9 @@ function Selector(p) {
 
     for (var i in targets) {
         var cell = targets[i].data;
-        if(cell.id == p.socket_id){
-            if (cell.type == 0) {
-
-                if(cell.x > x1 && cell.x < x2 && cell.y > y1 && cell.y < y2){
-                    cell.selected = true;
-                }
+        if (cell.id == p.socket_id) {
+            if (cell.x > x1 && cell.x < x2 && cell.y > y1 && cell.y < y2) {
+                cell.selected = true;
             }
         }
     }
@@ -366,6 +349,9 @@ function collider() {
 }
 
 function tick(dt) {
+    //clear the socket buffer
+    io.sendBuffer = [];
+
     //Create the rectangle for the quadtree
     var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
     //Create the quadtree
@@ -386,7 +372,7 @@ function tick(dt) {
         for (var c in CELL_LIST) {
             var cell = CELL_LIST[c];
             var cellType = cell.type;
-            cell.update(dt);
+            cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
             if (cell.valid) {
                 cells.push(cell.getInfo());
             }
@@ -407,7 +393,7 @@ function tick(dt) {
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
                         temp.color = cell.color;
-                        temp.size = 5;
+                        temp.size = 3;
                         temp.type = 0;
                         CELL_LIST.push(temp);
                     }
@@ -422,9 +408,9 @@ function tick(dt) {
     }
 
     var temp = [];
-    for(var i in CELL_LIST){
+    for (var i in CELL_LIST) {
         var cell = CELL_LIST[i];
-        if(cell.valid){
+        if (cell.valid) {
             temp.push(cell);
         }
     }

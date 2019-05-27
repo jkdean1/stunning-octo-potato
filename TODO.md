@@ -16,8 +16,9 @@
     - Right click to select; left click to move?
     - Single click to select; double click to move?
     - Single-single to select-move; right click to deselect?
-  * Cannot leave map
+  * ~~Cannot leave map~~
   * Game-over screen
+  * Zoom out ~50%
   
 ## Execution
 
