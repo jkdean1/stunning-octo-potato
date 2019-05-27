@@ -349,9 +349,6 @@ function collider() {
 }
 
 function tick(dt) {
-    //clear the socket buffer
-    io.sendBuffer = [];
-
     //Create the rectangle for the quadtree
     var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
     //Create the quadtree
