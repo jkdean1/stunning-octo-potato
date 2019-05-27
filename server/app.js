@@ -88,10 +88,10 @@ io.sockets.on('connection', function (socket) {
     //cell.color = player.color;
     //CELL_LIST.push(cell);
 
-    var randomID = Util.getRandomId();
-    var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
-    cell.color = player.color;
-    CELL_LIST.push(cell);
+    //var randomID = Util.getRandomId();
+    //var cell = new Cell(socket.id, randomID, randomX, randomY + 200);
+    //cell.color = player.color;
+    //CELL_LIST.push(cell);
 
     //INSERT ALL POINTS INTO THE QUADTREE!!!!
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
@@ -406,7 +406,7 @@ function tick(dt) {
                         temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
-                        temp.color = player.color;
+                        temp.color = cell.color;
                         temp.size = 5;
                         temp.type = 0;
                         CELL_LIST.push(temp);
