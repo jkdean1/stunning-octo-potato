@@ -79,7 +79,7 @@ io.sockets.on('connection', function (socket) {
 
     //Create the players first cell
     var randomID = Util.getRandomId();
-    var cell = new Cell(socket.id, randomID, 200, 200);
+    var cell = new Cell(socket.id, randomID, randomX, randomY);
     cell.color = player.color;
     CELL_LIST.push(cell);
 
@@ -406,9 +406,7 @@ function tick(dt) {
                         temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
                         temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
                         temp.target = true;
-                        
                         temp.color = cell.color;
-                        console.log(temp.color + "   " + cell.color);
                         temp.size = 5;
                         temp.type = 0;
                         CELL_LIST.push(temp);
