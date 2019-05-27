@@ -188,9 +188,7 @@ function draw(dt) {
             context.fill();
 
             if (cell.selected) {
-                console.log(cell.id + "  " + ID);
                 if(cell.id == ID){
-                    console.log(cell.id + "  " + ID);
                     context.strokeStyle = "white";
                     context.lineWidth = 1.5;
                     context.stroke();
