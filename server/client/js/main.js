@@ -87,7 +87,7 @@ function setup() {
     width = this.canvas.width = window.innerWidth;
     height = this.canvas.height = window.innerHeight;
 
-    socket.volatile.emit('windowResized', {
+    socket.emit('windowResized', {
         w: width,
         h: height
     });
@@ -295,7 +295,7 @@ function resize() {
     width = this.canvas.width = window.innerWidth;
     height = this.canvas.height = window.innerHeight;
 
-    socket.volatile.emit('windowResized', {
+    socket.emit('windowResized', {
         w: width,
         h: height
     });
@@ -317,7 +317,7 @@ document.onmousedown = function (event) {
         lastMouseX = event.x;
         lastMouseY = event.y;
 
-        socket.volatile.emit('leftmousedown', {
+        socket.emit('leftmousedown', {
             state: true,
             x: event.x,
             y: event.y
@@ -327,7 +327,7 @@ document.onmousedown = function (event) {
         lastMouseX = event.x;
         lastMouseY = event.y;
 
-        socket.volatile.emit('rightmousedown', {
+        socket.emit('rightmousedown', {
             x: event.x,
             y: event.y
         });
@@ -340,7 +340,7 @@ document.onmouseup = function (event) {
     lastMouseX = event.x;
     lastMouseY = event.y;
 
-    socket.volatile.emit('mouseup', {
+    socket.emit('mouseup', {
         state: false,
         x: event.x,
         y: event.y
@@ -352,7 +352,7 @@ document.onmousemove = function (event) {
     currMouseX = event.x;
     currMouseY = event.y;
 
-    socket.volatile.emit('mousemove', {
+    socket.emit('mousemove', {
         x: event.x,
         y: event.y
     });
@@ -361,42 +361,42 @@ document.onmousemove = function (event) {
 document.onkeydown = function (event) {
 
     if (event.keyCode === 68) //d
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'right',
             state: true
         });
     else if (event.keyCode === 83) //s
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'down',
             state: true
         });
     else if (event.keyCode === 65) //a
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'left',
             state: true
         });
     else if (event.keyCode === 87) // w
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'up',
             state: true
         });
     else if (event.keyCode === 32) // space
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'space',
             state: true
         });
     else if (event.keyCode === 16) // shift
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'shift',
             state: true
         });
     else if (event.keyCode === 17) // ctrl
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'ctrl',
             state: true
         });
     else if (event.keyCode === 91) // cmd
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'cmd',
             state: true
         });
@@ -405,42 +405,42 @@ document.onkeydown = function (event) {
 document.onkeyup = function (event) {
 
     if (event.keyCode === 68) //d
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'right',
             state: false
         });
     else if (event.keyCode === 83) //s
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'down',
             state: false
         });
     else if (event.keyCode === 65) //a
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'left',
             state: false
         });
     else if (event.keyCode === 87) // w
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'up',
             state: false
         });
     else if (event.keyCode === 32) // space
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'space',
             state: false
         });
     else if (event.keyCode === 16) // shift
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'shift',
             state: false
         });
     else if (event.keyCode === 17) // ctrl
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'ctrl',
             state: false
         });
     else if (event.keyCode === 91) // cmd
-        socket.volatile.emit('keyPress', {
+        socket.emit('keyPress', {
             inputId: 'cmd',
             state: false
         });

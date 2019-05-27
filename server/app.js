@@ -360,7 +360,7 @@ function tick(dt) {
         var socket = SOCKET_LIST[player.socket_id];
 
         //Update the players location on there screen
-        socket.volatile.emit('updateLocation', player.getInfo());
+        socket.emit('updateLocation', player.getInfo());
 
         //array to package the cells into
         var cells = [];
@@ -398,7 +398,7 @@ function tick(dt) {
             }
         }
 
-        socket.volatile.emit('cells', cells);
+        socket.emit('cells', cells);
 
         //Update the player
         player.updatePosition();
