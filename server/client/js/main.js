@@ -266,7 +266,6 @@ function run() {
 
 function startGame() {
 
-    //window.onload = function () {
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {

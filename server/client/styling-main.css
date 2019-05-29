@@ -9,6 +9,7 @@ html, body {
 canvas {
 	position: absolute;
 	display: block;
+	z-index: -1;
 }
 
 h2 {
@@ -115,7 +116,8 @@ input:checked+.slider:before {
 	height:100%;
         opacity:1;
 	-webkit-transition: opacity 0.3s;
-	-moz-transition: opacity 0.03s;
+	-moz-transition: opacity 0.3s;
 	-o-transition: opacity 0.3s;
 	transition: opacity 0.3s;
+	z-index: 1;
 }
