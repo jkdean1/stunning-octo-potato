@@ -24,7 +24,7 @@ var mapHeight = c.mapHeight;
 var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
 
-var maxCells = 400;
+var maxCells = 600;
 
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
@@ -347,11 +347,11 @@ function collider() {
         var m2 = (dpnorm2 * (cell2.mass - cell2.mass) + 2 * cell1.mass * dpnorm1) / (cell1.mass + cell2.mass);
 
         if(tx > 5){
-            tx = 7;
+            tx = 5;
         }
 
         if(ty > 5){
-            ty = 7;
+            ty = 5;
         }
 
         //Update the Cells Velocities
