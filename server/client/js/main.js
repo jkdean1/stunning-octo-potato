@@ -1,7 +1,7 @@
 //Global Variables
 //var socket = io.connect("https://io.thorjhanson.com/"); //uncomment for server version. 
-var socket = io.connect();
 //var socket = io();
+var socket = io.connect();
 var ID;
 var DEBUG = false;
 
@@ -264,9 +264,17 @@ function run() {
     frame();
 }
 
-function startGame() {
+window.onload = function () {
 
-    //window.onload = function () {
+}
+
+function startGame() {
+    // These few lines handle the landing page transition
+    landingdiv = document.getElementById('landingDiv');
+    landingdiv.style.transition = 'opacity 1s';
+    landingdiv.style.transition = 'bottom 1s';
+    landingdiv.style.bottom='2000px';
+    
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {

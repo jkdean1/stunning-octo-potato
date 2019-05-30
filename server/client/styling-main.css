@@ -9,6 +9,7 @@ html, body {
 canvas {
 	position: absolute;
 	display: block;
+	z-index: 3;
 }
 
 h2 {
@@ -25,7 +26,7 @@ h2 {
 .QualitySwitch {
 	background-color: white;
 	display: inline-block;
-	position: fixed;
+	position: absolute;
 	margin: auto;
 	width: 90px;
 	height: 90px;
@@ -91,7 +92,6 @@ input:checked+.slider:before {
 	border-radius: 50%;
 }
 .startbutton { 
-
 	font-family: 'Helvetica Neue', sans-serif;
 	font-size: 3vw;
 	margin-bottom: 5%;
@@ -99,7 +99,7 @@ input:checked+.slider:before {
 	letter-spacing: -1px;
 	background-color: white;
 	display: inline-block;
-	position: fixed;
+	position: absolute;
 	margin: auto;
 	width: 20%;
 	height: 10%;
@@ -110,12 +110,12 @@ input:checked+.slider:before {
 	cursor: pointer;
 }
 #landingDiv {
-	background-color: red;
+	position: absolute;	
+	background-color: #111111;
 	width: 100%;
 	height:100%;
         opacity:1;
-	-webkit-transition: opacity 0.3s;
-	-moz-transition: opacity 0.03s;
-	-o-transition: opacity 0.3s;
-	transition: opacity 0.3s;
+	z-index: 5;
+	transition: bottom 1s;
+	bottom: 0;
 }
