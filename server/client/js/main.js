@@ -37,6 +37,8 @@ backgroundImage.src = 'client/res/img/tile2.jpg';
 // Variables for controlling visual effects
 var pulser = 0;
 
+var alreadyFullScreen = 0;
+
 //Cell variables
 var cells = [];
 var blobs = [];
@@ -219,7 +221,18 @@ function run() {
     frame();
 }
 
-window.onload = function () {
+function toggleFullScreen() {
+
+    var elem = document.documentElement;
+
+    if (alreadyFullScreen == 0){
+	elem.requestFullscreen();
+	alreadyFullScreen = 1;
+    }
+    else if (alreadyFullScreen == 1){
+        document.exitFullscreen();
+        alreadyFullScreen = 0;
+    }
 
 }
 
@@ -227,9 +240,11 @@ function startGame() {
     // These few lines handle the landing page transition
     sendName();
     landingdiv = document.getElementById('landingDiv');
+    fullbutton = document.getElementById('fullbutton');
     landingdiv.style.transition = 'opacity 1s';
     landingdiv.style.transition = 'bottom 1s';
     landingdiv.style.bottom='2000px';
+    //fullbutton.style.opacity = '0.3'; 
     
     window.addEventListener('resize', resize, false);
 
