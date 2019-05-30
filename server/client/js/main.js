@@ -1,6 +1,4 @@
 //Global Variables
-//var socket = io.connect("https://io.thorjhanson.com/"); //uncomment for server version. 
-//var socket = io();
 var socket = io.connect();
 var ID;
 var DEBUG = false;
@@ -211,42 +209,10 @@ function draw(dt) {
     }
 }
 
-function update(data) {
-    players = [];
-    for (var i = 0; i < data.players.length; i++) {
-        players[i] = data.players[i];
-    }
-}
-
 function run() {
-    var now;
-    var dt = 0;
-    var last = timestamp();
-    var slow = 1; // slow motion scaling factor
-    var step = 1 / 60;
-    var slowStep = slow * step;
-
-    var fpsmeter = new FPSMeter({
-        decimals: 0,
-        graph: false,
-        heat: false,
-        heatOn: 0,
-        theme: 'transparent',
-        left: '5px'
-    });
 
     var frame = function () {
-        fpsmeter.tickStart();
-        now = timestamp();
-        dt = dt + Math.min(1, (now - last) / 1000);
-
-        while (dt > slowStep) {
-            dt = dt - slowStep;
-        }
-
-        draw(dt / slow);
-        last = now;
-        fpsmeter.tick();
+        draw();
         requestAnimationFrame(frame);
     }
 
