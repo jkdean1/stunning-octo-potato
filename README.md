@@ -1,5 +1,5 @@
 # stunning-octo-potato
-## Version: 0.1.0
+## Version: 0.2.0
 ## The Blob Project
 
 This Project is the attempt at creating something fun and enjoyable, while also using the skills I have aquired over the course of a year in web development. 
