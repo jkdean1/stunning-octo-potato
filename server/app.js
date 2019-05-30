@@ -402,7 +402,6 @@ function tick(dt) {
 
     CELL_LIST.length = 0;
     CELL_LIST = temp;
-
 }
 
 function sendInfo() {
@@ -449,6 +448,8 @@ var endTime = 0;
 var totalTime = 0;
 var numberOfLoops = 0;
 
+setInterval(sendInfo, 1000/ 40);
+
 setInterval(function (argument) {
     // execution time simulated with setTimeout function
     hrend = process.hrtime(hrstart);
@@ -469,7 +470,6 @@ setInterval(function (argument) {
     //Reset the time
     hrstart = process.hrtime();
 
-
     if (DEBUG) {
 
         //grab the end time
@@ -487,7 +487,4 @@ setInterval(function (argument) {
         //Increment the loops variable
         numberOfLoops++;
     }
-
 }, desiredTicks);
-
-setInterval(sendInfo, 1000/ 40);

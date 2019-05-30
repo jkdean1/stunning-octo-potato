@@ -23,8 +23,8 @@
 ## Execution
 
   * Rework game looping to include separation based on necessity
-  * Only send data needed
-  * Send only 1 socket emit to the client, rather than multiple of them
+  * Only send data needed (sort of complete...)
+  * ~~Send only 1 socket emit to the client, rather than multiple of them~~
   * Get rid of all object based functionality, everything should be done in the main loop
   * Create global.js for all global variable
   * Create a "heart beat" to determine player idle time, then kick if they are idle for too long
