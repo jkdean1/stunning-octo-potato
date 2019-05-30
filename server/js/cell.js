@@ -36,7 +36,7 @@ class Cell {
         //target aquired
         this.target = false;
 
-        this.counterMax = 100;
+        this.counterMax = 10;
         this.counter = this.counterMax;
     }
 
@@ -94,6 +94,8 @@ class Cell {
         } 
 
         this.counter--;
+
+        
     }
 
     arrive() {
