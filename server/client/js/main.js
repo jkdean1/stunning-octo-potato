@@ -287,8 +287,12 @@ function resize() {
 }
 
 function sendName(){
-    var name = "";
-    //Get the Text from the text box
+    var name = document.getElementById("nameBox").value;
+
+    if(DEBUG){
+        console.log(name);
+    }
+
     //Filter Text
     //Set name = new text
 

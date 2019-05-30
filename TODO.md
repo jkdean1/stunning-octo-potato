@@ -9,6 +9,8 @@
 ## Visuals
 
   * ~~Make glowing look less intimidating~~
+  * Replace names that could be inaproprate with names that are, but still related
+    * Example: Dick becomes Richard
 
 ## Usability
 

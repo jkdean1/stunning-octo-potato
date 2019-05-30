@@ -346,6 +346,14 @@ function collider() {
         var m1 = (dpnorm1 * (cell1.mass - cell2.mass) + 2 * cell2.mass * dpnorm2) / (cell1.mass + cell2.mass);
         var m2 = (dpnorm2 * (cell2.mass - cell2.mass) + 2 * cell1.mass * dpnorm1) / (cell1.mass + cell2.mass);
 
+        if(tx > 5){
+            tx = 7;
+        }
+
+        if(ty > 5){
+            ty = 7;
+        }
+
         //Update the Cells Velocities
         cell1.vx = tx * dptan1 + nx * m1;
         cell1.vy = ty * dptan1 + ny * m1;
