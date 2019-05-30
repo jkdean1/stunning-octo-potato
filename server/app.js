@@ -158,7 +158,7 @@ io.sockets.on('connection', function (socket) {
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
 
-            if(cell.id == socket.id){
+            if (cell.id == socket.id) {
                 if (cell.selected) {
                     cell.tx = data.x + player.canvasXZero;
                     cell.ty = data.y + player.canvasYZero;
@@ -172,7 +172,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('rightmousedown', function (data) {
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
-            if(cell.id == socket.id){
+            if (cell.id == socket.id) {
                 cell.selected = false;
             }
         }
@@ -352,60 +352,46 @@ function collider() {
 
 function tick(dt) {
     //Create the rectangle for the quadtree
-    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
+    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2);
     //Create the quadtree
     QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
 
-    //For every player in the PLAYER_LIST
-    for (var p in PLAYER_LIST) {
-        var player = PLAYER_LIST[p];
-        var socket = SOCKET_LIST[player.socket_id];
+    for (var c in CELL_LIST) {
+        var cell = CELL_LIST[c];
+        var cellType = cell.type;
+        cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
 
-        //Update the players location on there screen
-        socket.emit('updateLocation', player.getInfo());
+        //Add the cells to the quadtree
+        var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
+        QUADTREE.insert(point);
 
-        //array to package the cells into
-        var cells = [];
-
-        //loop through all the cells
-        for (var c in CELL_LIST) {
-            var cell = CELL_LIST[c];
-            var cellType = cell.type;
-            cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
-            if (cell.valid) {
-                cells.push(cell.getInfo());
-            }
-            //Add the cells to the quadtree
-            var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
-            QUADTREE.insert(point);
-
-            //if there are not too many cells...
-            if (CELL_LIST.length < maxCells) {
-                //Add a new cell if it is time
-                if (cellType == 1) {
-                    if (cell.counter == 0) {
-                        var randomDistance = Util.getRandomInt(20, 50);
-                        var randomID = Util.getRandomId();
-                        var temp = new Cell(cell.id, randomID, cell.x, cell.y);
-                        var randomAngle = Math.random() * Math.PI * 2;
-                        temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
-                        temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
-                        temp.target = true;
-                        temp.color = cell.color;
-                        temp.size = 3;
-                        temp.type = 0;
-                        CELL_LIST.push(temp);
-                    }
+        //if there are not too many cells...
+        if (CELL_LIST.length < maxCells) {
+            //Add a new cell if it is time
+            if (cellType == 1) {
+                if (cell.counter == 0) {
+                    var randomDistance = Util.getRandomInt(20, 50);
+                    var randomID = Util.getRandomId();
+                    var temp = new Cell(cell.id, randomID, cell.x, cell.y);
+                    var randomAngle = Math.random() * Math.PI * 2;
+                    temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
+                    temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
+                    temp.target = true;
+                    temp.color = cell.color;
+                    temp.size = 3;
+                    temp.type = 0;
+                    CELL_LIST.push(temp);
                 }
             }
         }
-
-        socket.emit('cells', cells);
-
-        //Update the player
-        player.updatePosition();
     }
 
+    //For every player in the PLAYER_LIST
+    for (var p in PLAYER_LIST) {
+        PLAYER_LIST[p].updatePosition();
+    }
+
+    //remove cells that are dead
     var temp = [];
     for (var i in CELL_LIST) {
         var cell = CELL_LIST[i];
@@ -417,6 +403,35 @@ function tick(dt) {
     CELL_LIST.length = 0;
     CELL_LIST = temp;
 
+}
+
+function sendInfo() {
+    for (var i in PLAYER_LIST) {
+        //Grab the player and respective socket objects.
+        var player = PLAYER_LIST[i];
+        var socket = SOCKET_LIST[player.socket_id];
+
+        //Get all objects that are in the quadtree around the player
+        var rectangle = new QuadTreeModule.Rectangle(player.canvasXZero, player.canvasYZero, player.canvasXMax, player.canvasYMax);
+        var objects = QUADTREE.query(rectangle);
+
+        if (objects) {
+            //Put all object information inside an array
+            var sendObjects = [];
+            for (var o in objects) {
+                var object = objects[o].data;
+                if(object.valid){
+                    sendObjects.push(object.getInfo());
+                }
+            }
+        }
+
+        //Grab the player infomation
+        var playerInfo = player.getInfo();
+
+        //Send all data to the player
+        socket.emit('update', playerInfo, sendObjects);
+    }
 }
 
 /*
@@ -475,75 +490,4 @@ setInterval(function (argument) {
 
 }, desiredTicks);
 
-/*
-//The current "game loop" -This needs to be updated later to be more functional. 
-setInterval(function () {
-
-    //Create the rectangle for the quadtree
-    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
-    //Create the quadtree
-    QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
-
-    for (var p in PLAYER_LIST) {
-        var player = PLAYER_LIST[p];
-        var socket = SOCKET_LIST[player.socket_id]
-        socket.emit('updateLocation', player.getInfo());
-
-        var cells = [];
-
-        for (var c in CELL_LIST) {
-            var cell = CELL_LIST[c];
-            cell.update();
-            cells.push(cell.getInfo());
-            var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
-            QUADTREE.insert(point);
-        }
-
-        socket.emit('cells', cells);
-
-        var blobs = [];
-
-        for (var b1 in BLOB_LIST) {
-            var blobArray = BLOB_LIST[b1];
-            for (var b2 in blobArray) {
-                //var blob = blobArray[b2];
-                //blob.update();
-                //blobs.push(blob.getInfo());
-            }
-        }
-
-        collider();
-
-        /*
-        //Deal with colision
-        for(var i in CELL_LIST){
-            var p = CELL_LIST[i];
-            let range = new QuadTreeModule.Circle(p.x, p.y, p.size * 4);
-            let others = QUADTREE.query(range);
-            for(var j in others){
-                var other = others[j].data;
-                if(other != p){
-                    if(doCirclesOverlap(p.x, p.y, p.size, other.x, other.y, other.size)){
-                        var distance = Math.sqrt((p.x - other.x) * (p.x - other.x) + (p.y - other.y) * (p.y - other.y));
-                        var midPointX = (p.x + other.x) / 2;
-                        var midPointY = (p.y + other.y) / 2;
-                        p.x = midPointX + p.size * ((p.x - other.x) / distance);
-                        p.tx = p.x;
-                        p.y = midPointY + p.size * ((p.y - other.y) / distance);
-                        p.ty = p.y;
-                        other.x = midPointX + other.size * (other.x - p.x) / distance;
-                        other.tx = other.x;
-                        other.y = midPointY + other.size * (other.y - p.y) / distance;
-                        other.ty = other.y;
-                    }
-                }
-            }
-        }
-
-        socket.emit('blobs', blobs);
-
-        player.updatePosition();
-    }
-}, 1000 / 60); //60 times a second
-
-*/
+setInterval(sendInfo, 1000/ 40);

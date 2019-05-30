@@ -57,27 +57,16 @@ socket.on('connected', function (data) {
     }
 });
 
-socket.on('updateLocation', function (data) {
-    x = data.x;
-    y = data.y;
-});
-
-socket.on('map', function (data) {
-    map = data;
-});
-
 socket.on('message', function (data) {
     console.log(data);
 });
 
-socket.on('cells', function (data) {
-    cells = [];
-    cells = data;
-});
+socket.on('update', function (data1, data2) {
+    x = data1.x;
+    y = data1.y;
 
-socket.on('blobs', function (data) {
-    blobs = [];
-    blobs = data;
+    cells = [];
+    cells = data2;
 });
 
 function setup() {

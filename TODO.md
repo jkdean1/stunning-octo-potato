@@ -18,7 +18,7 @@
     - Single-single to select-move; right click to deselect?
   * ~~Cannot leave map~~
   * Game-over screen
-  * ~~Zoom out ~50%~~
+  * ~~Zoom out 50%~~
   
 ## Execution
 
