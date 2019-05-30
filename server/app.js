@@ -73,7 +73,7 @@ io.sockets.on('connection', function (socket) {
     //Create the Player
     var randomX = Math.floor(Util.getRandomInt(0, mapWidth * tileWidth));
     var randomY = Math.floor(Util.getRandomInt(0, mapHeight * tileHeight));
-    var player = new Player(socket.id, randomX, randomY);
+    var player = new Player(socket.id, "", randomX, randomY);
     //Add the player to the player list at the id of the socket
     PLAYER_LIST[socket.id] = player;
 
@@ -118,6 +118,11 @@ io.sockets.on('connection', function (socket) {
     socket.on('windowResized', function (data) {
         player.updateScreen(data.w, data.h);
     });
+
+    //When the player chooses a name (should be added later somehow.. this isnt good)
+    socket.on('name', function(data){
+        player.name = data;
+    })
 
     //When the player presses a key
     socket.on('keyPress', function (data) {
@@ -347,7 +352,6 @@ function collider() {
         cell2.vx = tx * dptan2 + nx * m2;
         cell2.vy = ty * dptan2 + ny * m2;
     }
-
 }
 
 function tick(dt) {

@@ -286,6 +286,15 @@ function resize() {
     });
 }
 
+function sendName(){
+    var name = "";
+    //Get the Text from the text box
+    //Filter Text
+    //Set name = new text
+
+    socket.emit("name", name); //This will send it to the server
+}
+
 function timestamp() {
     return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
 }

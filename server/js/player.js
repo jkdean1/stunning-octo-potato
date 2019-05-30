@@ -2,9 +2,12 @@ var Blob = require('./blob.js');
 var Util = require('./util.js');
 
 class Player {
-    constructor(id, x, y) {
+    constructor(id, n, x, y) {
         //socket
         this.socket_id = id;
+
+        //Name
+        this.name = n;
 
         //cells
         this.color = Util.getRandomColor();
