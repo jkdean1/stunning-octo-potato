@@ -236,17 +236,13 @@ function run() {
     });
 
     var frame = function () {
-        fpsmeter.tickStart();
         now = timestamp();
         dt = dt + Math.min(1, (now - last) / 1000);
-
         while (dt > slowStep) {
             dt = dt - slowStep;
         }
-
         draw(dt / slow);
         last = now;
-        fpsmeter.tick();
         requestAnimationFrame(frame);
     }
 
@@ -259,6 +255,7 @@ window.onload = function () {
 
 function startGame() {
     // These few lines handle the landing page transition
+    sendName();
     landingdiv = document.getElementById('landingDiv');
     landingdiv.style.transition = 'opacity 1s';
     landingdiv.style.transition = 'bottom 1s';
