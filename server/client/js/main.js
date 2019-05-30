@@ -57,27 +57,16 @@ socket.on('connected', function (data) {
     }
 });
 
-socket.on('updateLocation', function (data) {
-    x = data.x;
-    y = data.y;
-});
-
-socket.on('map', function (data) {
-    map = data;
-});
-
 socket.on('message', function (data) {
     console.log(data);
 });
 
-socket.on('cells', function (data) {
-    cells = [];
-    cells = data;
-});
+socket.on('update', function (data1, data2) {
+    x = data1.x;
+    y = data1.y;
 
-socket.on('blobs', function (data) {
-    blobs = [];
-    blobs = data;
+    cells = [];
+    cells = data2;
 });
 
 function setup() {
@@ -304,6 +293,19 @@ function resize() {
         w: width,
         h: height
     });
+}
+
+function sendName(){
+    var name = document.getElementById("nameBox").value;
+
+    if(DEBUG){
+        console.log(name);
+    }
+
+    //Filter Text
+    //Set name = new text
+
+    socket.emit("name", name); //This will send it to the server
 }
 
 function timestamp() {
