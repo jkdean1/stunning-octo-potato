@@ -94,20 +94,27 @@ input:checked+.slider:before {
 .startbutton { 
 	font-family: 'Helvetica Neue', sans-serif;
 	font-size: 3vw;
-	margin-bottom: 5%;
 	font-weight: bold;
 	letter-spacing: -1px;
 	background-color: white;
 	display: inline-block;
 	position: absolute;
 	margin: auto;
+	margin-top: 10%;
 	width: 20%;
 	height: 10%;
-	bottom: 45%;
-	right: 40%;
 	border-radius: 25px;
 	align-content: center;
 	cursor: pointer;
+}
+#nameBox {
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 2vw;
+	position: absolute;
+	margin: auto;
+	margin-top: -10%;
+	height: 5%;
+	
 }
 #landingDiv {
 	position: absolute;	
@@ -118,4 +125,9 @@ input:checked+.slider:before {
 	z-index: 5;
 	transition: bottom 1s;
 	bottom: 0;
+	text-align: center;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
