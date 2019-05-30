@@ -225,6 +225,7 @@ window.onload = function () {
 
 function startGame() {
     // These few lines handle the landing page transition
+    sendName();
     landingdiv = document.getElementById('landingDiv');
     landingdiv.style.transition = 'opacity 1s';
     landingdiv.style.transition = 'bottom 1s';
