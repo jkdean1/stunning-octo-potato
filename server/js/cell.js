@@ -12,7 +12,7 @@ class Cell {
         //valid or not
         this.valid = true;
         //size
-        this.size = 40;
+        this.size = 20;
         //mass
         this.mass = this.size * 2;
         //max speed
@@ -40,7 +40,7 @@ class Cell {
         this.counter = this.counterMax;
     }
 
-    update(dt) {
+    update(dt, mapWidth, mapHeight) {
 
         dt = dt || 0;
 
@@ -68,6 +68,23 @@ class Cell {
                 this.vy = 0;
             }
 
+            //Clamp the position so it doesn't go outside the map...
+            if(this.x - this.size <= 0)
+            {
+                this.x = this.size;
+            }
+            if(this.y - this.size <= 0)
+            {
+                this.y = this.size;
+            }
+            if(this.x + this.size >= mapWidth)
+            {
+                this.x = mapWidth - this.size;
+            }
+            if(this.y + this.size >= mapHeight){
+                this.y = mapHeight - this.size;
+            }
+
             this.ax = 0;
             this.ay = 0;
         }
@@ -77,6 +94,8 @@ class Cell {
         } 
 
         this.counter--;
+
+        
     }
 
     arrive() {
@@ -104,6 +123,7 @@ class Cell {
 
     getInfo() {
         return {
+            id: this.id,
             x: this.x,
             y: this.y,
             color: this.color,

@@ -1,6 +1,5 @@
 //Global Variables
-var socket = io.connect("https://io.thorjhanson.com/");
-//var socket = io();
+var socket = io.connect();
 var ID;
 var DEBUG = false;
 
@@ -35,9 +34,8 @@ var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
 
-
-var pulser = 0
-var breather = 1;
+// Variables for controlling visual effects
+var pulser = 0;
 
 //Cell variables
 var cells = [];
@@ -57,27 +55,16 @@ socket.on('connected', function (data) {
     }
 });
 
-socket.on('updateLocation', function (data) {
-    x = data.x;
-    y = data.y;
-});
-
-socket.on('map', function (data) {
-    map = data;
-});
-
 socket.on('message', function (data) {
     console.log(data);
 });
 
-socket.on('cells', function (data) {
-    cells = [];
-    cells = data;
-});
+socket.on('update', function (data1, data2) {
+    x = data1.x;
+    y = data1.y;
 
-socket.on('blobs', function (data) {
-    blobs = [];
-    blobs = data;
+    cells = [];
+    cells = data2;
 });
 
 function setup() {
@@ -94,6 +81,7 @@ function setup() {
     //set the current players location to the center of the screen
     x = width / 2;
     y = height / 2;
+
 
     run();
 }
@@ -138,55 +126,63 @@ function draw(dt) {
     context.fillStyle = "black";
     //Draw the cells
     if (cells) {
-        if(breather == 1){
-	  pulser++;
-          if (pulser >= 60) { breather = 0;}
-        } else if ( breather == 0){
-          pulser--;
-          if (pulser <= 0) { breather = 1;}
-        } 
+
+        pulser++;
+        if (pulser >= 60){ pulser = 0;}
+
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
+            var color = cell.color;
 
-            var grd = context.createRadialGradient(cell.x,cell.y,cell.size,cell.x,cell.y,cell.size*1.5+5*(pulser/30));
-            grd.addColorStop(0,cell.color);
-            var roughcolor = cell.color.match(/\d+/g);
-            var color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
-            grd.addColorStop(1,color);
-            context.fillStyle = grd;
-            context.beginPath();
-            context.arc(cell.x, cell.y, cell.size*3, 0, Math.PI * 2);
-            context.closePath();
-            context.fill();
-            context.fillStyle = cell.color;
-            context.lineWidth = 2;
-            context.strokeStyle = cell.color;
+            if (highQuality) {
+                //grab the color values
+                var roughcolor = cell.color.match(/\d+/g);
+                color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
+
+                //Create the gradient pulse
+                var offsetBlur = pulser+(i%60);
+                if (offsetBlur>=60){
+                    offsetBlur = offsetBlur-60;
+                }
+                if (offsetBlur >= 31){
+                    offsetBlur = 60 - offsetBlur;
+                }
+                // Implement the gradient
+                var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2*(offsetBlur / 30));
+                grd.addColorStop(0, cell.color);
+                grd.addColorStop(1, color);
+
+                //Set the fillstyle to the gradient
+                context.fillStyle = grd;
+
+                //Render the glow
+                context.beginPath();
+                context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
+                context.closePath();
+                context.fill();
+            }
+
+            //Fill Color
+            context.fillStyle = color;
+
+            //Draw the cell
             context.beginPath();
             context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
             context.closePath();
             context.fill();
 
-            if (highQuality) {
-                context.stroke();
-
-		
-            }
-
-            //context.fillStyle = "white";
-            //context.textAlign = "center";
-            //context.fillText(cell.mass, cell.x, cell.y + cell.mass);
-
             if (cell.selected) {
-                context.strokeStyle = "green";
-                context.lineWidth = 1.5;
-                context.stroke();
+                if(cell.id == ID){
+                    context.strokeStyle = "white";
+                    context.lineWidth = 1.5;
+                    context.stroke();
+                }
             }
-
         }
     }
 
-    context.strokeStyle = "green";
-    context.lineWidth = 3;
+    context.strokeStyle = "rgba(255, 255, 255, 200)";
+    context.lineWidth = 2;
 
     //Draw the box
     if (mouseDown) {
@@ -213,51 +209,28 @@ function draw(dt) {
     }
 }
 
-function update(data) {
-    players = [];
-    for (var i = 0; i < data.players.length; i++) {
-        players[i] = data.players[i];
-    }
-}
-
 function run() {
-    var now;
-    var dt = 0;
-    var last = timestamp();
-    var slow = 1; // slow motion scaling factor
-    var step = 1 / 60;
-    var slowStep = slow * step;
-
-    var fpsmeter = new FPSMeter({
-        decimals: 0,
-        graph: false,
-        heat: false,
-        heatOn: 0,
-        theme: 'transparent',
-        left: '5px'
-    });
 
     var frame = function () {
-        fpsmeter.tickStart();
-        now = timestamp();
-        dt = dt + Math.min(1, (now - last) / 1000);
-
-        while (dt > slowStep) {
-            dt = dt - slowStep;
-        }
-
-        draw(dt / slow);
-        last = now;
-        fpsmeter.tick();
+        draw();
         requestAnimationFrame(frame);
     }
 
     frame();
 }
 
-function startGame() {
+window.onload = function () {
 
-    //window.onload = function () {
+}
+
+function startGame() {
+    // These few lines handle the landing page transition
+    sendName();
+    landingdiv = document.getElementById('landingDiv');
+    landingdiv.style.transition = 'opacity 1s';
+    landingdiv.style.transition = 'bottom 1s';
+    landingdiv.style.bottom='2000px';
+    
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {
@@ -287,6 +260,19 @@ function resize() {
         w: width,
         h: height
     });
+}
+
+function sendName(){
+    var name = document.getElementById("nameBox").value;
+
+    if(DEBUG){
+        console.log(name);
+    }
+
+    //Filter Text
+    //Set name = new text
+
+    socket.emit("name", name); //This will send it to the server
 }
 
 function timestamp() {

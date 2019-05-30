@@ -17,7 +17,6 @@
     <meta name="theme-color" content="#ffffff">
 
     <script src="/client/js/socket.io/socket.io.js"></script>
-    <script src="/client/js/FPSMeter/fpsmeter.js"></script>
     <script src="/client/js/main.js"></script>
 
 </head>
@@ -26,16 +25,18 @@
 <body>
     <canvas id="canvas"></canvas>
 
-    <input type="button" class="startbutton" onclick="this.style.display='none';startGame()" value="Join Game!">
+    <div id="landingDiv">
+	<input type="text" id="nameBox" value="" placeholder="Enter a Name!">
+        <input type="button" class="startbutton" onclick="startGame();" value="Join Game!">
+        <div class="QualitySwitch">
+            <h2>Fancy Graphics</h2>
+            <label class="switch" >
+                <input type="checkbox" checked onclick="toggleFancy()">
+                <span class="slider round"></span>
+            </label>
+        </div>
 
-    <div class="QualitySwitch">
-        <h2>Fancy Graphics</h2>
-        <label class="switch" >
-            <input type="checkbox" checked onclick="toggleFancy()">
-            <span class="slider round"></span>
-        </label>
     </div>
-
 </body>
 
 </html>
