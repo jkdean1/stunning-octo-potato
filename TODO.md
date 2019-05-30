@@ -9,8 +9,9 @@
 ## Visuals
 
   * ~~Make glowing look less intimidating~~
-  * Replace names that could be inaproprate with names that are, but still related
-    * Example: Dick becomes Richard
+  * Create a UI Layer on top of the canvas
+  * Add a player count display
+  * Create full screen Button
 
 ## Usability
 
@@ -21,17 +22,26 @@
   * ~~Cannot leave map~~
   * Game-over screen
   * ~~Zoom out 50%~~
+  * Remove zoom feature/Create scale factor for the game
+  * Add fullscreen display functionality
   
 ## Execution
 
   * Rework game looping to include separation based on necessity
-  * Only send data needed (sort of complete...)
+  * Only send data needed
   * ~~Send only 1 socket emit to the client, rather than multiple of them~~
   * Get rid of all object based functionality, everything should be done in the main loop
   * Create global.js for all global variable
   * Create a "heart beat" to determine player idle time, then kick if they are idle for too long
   * Paralellization
   * Rewrite entire Game in c++ and web assymbly, lol
+  * Create and send player count to each player, once a second. 
+  * Remove ability to select a location outside of the map
+  * Replace names that could be inaproprate with names that are, but still related
+    * Example: Dick becomes Richard
+  * Create maximum character amount for the name
+  * remove nuclear reactions
+  
 
   ## Unit Testing/Code Testing 
 
