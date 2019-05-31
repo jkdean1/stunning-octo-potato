@@ -133,7 +133,7 @@ input:checked+.slider:before {
 }
 #fullbutton {
 	z-index: 7; 
-	width: 7%; 
+	width: 5%; 
 	position: absolute;
 	margin: 1%;
 	transition: opacity 0.3s;
