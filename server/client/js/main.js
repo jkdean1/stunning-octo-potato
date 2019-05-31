@@ -226,11 +226,28 @@ function toggleFullScreen() {
     var elem = document.documentElement;
 
     if (alreadyFullScreen == 0){
-	elem.requestFullscreen();
-	alreadyFullScreen = 1;
+        if (elem.requestFullscreen){
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen){
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen){
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen){
+            elem.msRequestFullscreen();
+        }
+        alreadyFullScreen = 1;
     }
     else if (alreadyFullScreen == 1){
         document.exitFullscreen();
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+            document.msExitFullscreen();
+        }
         alreadyFullScreen = 0;
     }
 
