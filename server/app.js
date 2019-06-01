@@ -1,11 +1,25 @@
+/*
+ * Created by Jacob Cox
+*/
+
+
 //Import Required Libraries
-var Log = require('./js/log.js');
-var Util = require('./js/util.js');
 var express = require('express');
 var fs = require('fs');
+
+//Import Log Library
+var Log = require('./js/log.js');
+
+//Import Utilities
+var Util = require('./js/util.js');
+
+//Import Player
 var Player = require('./js/player.js');
-var Map = require('./js/map.js');
+
+//Import Cell
 var Cell = require('./js/cell.js');
+
+//Import QuadTree
 var QuadTreeModule = require('./js/quadtree.js');
 
 //Load Config Data
@@ -15,22 +29,29 @@ var c = JSON.parse(rawdata);
 //Create Server Variables
 var app = express();
 var serv = require('http').Server(app);
-var gameport = c.port;
-var DEBUG = c.debug;
 
 //config variables
+var gameport = c.port;
+var DEBUG = c.debug;
 var mapWidth = c.mapWidth;
 var mapHeight = c.mapHeight;
 var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
+var maxCells = c.maxCells;
+var maxQuadTreeEntities = c.maxQuadTreeEntities;
+var logToFile = c.logToFile;
 
-var maxCells = 600;
+//Create Empty arrays and objects for players and game entities
+var SOCKET_LIST = {};
+var PLAYER_LIST = [];
+var CELL_LIST = [];
+var FOOD = [];
 
 //Create the rectangle for the quadtree
 var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, );
 
 //Create the quadtree
-var QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
+var QUADTREE = new QuadTreeModule.QuadTree(rectangle, maxQuadTreeEntities);
 
 //Default location for the client
 app.get('/', function (req, res) {
@@ -40,14 +61,12 @@ app.get('/', function (req, res) {
 //If the client specifies something specific, it has to be in the client folder.
 app.use('/client', express.static(__dirname + '/client'));
 
+//Use the specified gameport
 serv.listen(gameport);
 
-Log("app", "Server Started on port: " + gameport, "info", true);
-
-var SOCKET_LIST = {};
-var PLAYER_LIST = [];
-var CELL_LIST = [];
-var BLOB_LIST = {};
+Log("###############################################################");
+Log("Server Started on port: " + gameport, "finish");
+Log("###############################################################\n");
 
 //Create socket connection.
 var io = require('socket.io')(serv, {});
@@ -67,12 +86,12 @@ io.sockets.on('connection', function (socket) {
     });
 
     if (DEBUG) {
-        Log("app", "Socket Created: " + socket.id, "info", false);
+        Log("Socket created with id: " + socket.id, "info");
     }
 
     //Create the Player
-    var randomX = Math.floor(Util.getRandomInt(0, mapWidth * tileWidth));
-    var randomY = Math.floor(Util.getRandomInt(0, mapHeight * tileHeight));
+    var randomX = Math.floor(Util.getRandomInt(100, (mapWidth * tileWidth - 100)));
+    var randomY = Math.floor(Util.getRandomInt(100, (mapHeight * tileHeight - 100)));
     var player = new Player(socket.id, "", randomX, randomY);
     //Add the player to the player list at the id of the socket
     PLAYER_LIST[socket.id] = player;
@@ -87,13 +106,10 @@ io.sockets.on('connection', function (socket) {
     var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
     QUADTREE.insert(point);
 
-    var blobList = [];
-    BLOB_LIST[socket.id] = blobList;
-
     //When the player disconnects
     socket.on('disconnect', function () {
         if (DEBUG)
-            Log("app", "Socket Deleted: " + socket.id, "info", false);
+            Log("Socket deleted with id: " + socket.id, "info");
         delete PLAYER_LIST[socket.id];
         delete SOCKET_LIST[socket.id];
 
@@ -110,8 +126,6 @@ io.sockets.on('connection', function (socket) {
             var c = tempList[i];
             CELL_LIST.push(c);
         }
-
-        delete BLOB_LIST[socket.id];
     });
 
     //When the players window is resized
@@ -193,13 +207,9 @@ io.sockets.on('connection', function (socket) {
             Selector(player);
         }
 
-        player.clicked(CELL_LIST, BLOB_LIST);
+        player.clicked(CELL_LIST);
     });
 });
-
-function doCirclesOverlap(x1, y1, r1, x2, y2, r2) {
-    return Math.abs((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) < (r1 + r2) * (r1 + r2);
-}
 
 function getDistance(x1, y1, r1, x2, y2, r2) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) || 1;
@@ -224,7 +234,7 @@ function Selector(p) {
     }
 }
 
-function collider() {
+function collider(dt) {
 
     var collidedParis = [];
 
@@ -232,6 +242,8 @@ function collider() {
     for (var i in CELL_LIST) {
         var cell = CELL_LIST[i];
         var cellType = cell.type;
+
+        cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
 
         //Get nearby Objects for collision
         var range = new QuadTreeModule.Circle(cell.x, cell.y, cell.size * cell.size);
@@ -254,7 +266,7 @@ function collider() {
                     //They are both generating cells, so do normal collision
 
                     //Check if the objects overlap
-                    if (doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
+                    if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
                         //Add both cells to the colliding pairs array for dynamic resolution later
                         collidedParis.push(cell);
@@ -294,7 +306,7 @@ function collider() {
                         }
                     } else {
                         //Check if the objects overlap
-                        if (doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
+                        if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
                             //Add both cells to the colliding pairs array for dynamic resolution later
                             collidedParis.push(cell);
@@ -363,19 +375,10 @@ function collider() {
 }
 
 function tick(dt) {
-    //Create the rectangle for the quadtree
-    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2);
-    //Create the quadtree
-    QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
 
     for (var c in CELL_LIST) {
         var cell = CELL_LIST[c];
         var cellType = cell.type;
-        cell.update(dt, mapWidth * tileWidth, mapHeight * tileHeight);
-
-        //Add the cells to the quadtree
-        var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
-        QUADTREE.insert(point);
 
         //if there are not too many cells...
         if (CELL_LIST.length < maxCells) {
@@ -414,6 +417,10 @@ function tick(dt) {
 
     CELL_LIST.length = 0;
     CELL_LIST = temp;
+}
+
+function heartBeat() {
+
 }
 
 function sendInfo() {
@@ -462,6 +469,8 @@ var numberOfLoops = 0;
 
 setInterval(sendInfo, 1000/ 40);
 
+setInterval(heartBeat, 1000);
+
 setInterval(function (argument) {
     // execution time simulated with setTimeout function
     hrend = process.hrtime(hrstart);
@@ -474,7 +483,19 @@ setInterval(function (argument) {
     //Calculate the delta time in miliseconds
     dt = hrend[1] / 1000000000;
 
-    collider();
+    //REDO Quadtree
+    var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2);
+    QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
+
+    for (var c in CELL_LIST) {
+        var cell = CELL_LIST[c];
+
+        //Add the cells to the quadtree
+        var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
+        QUADTREE.insert(point);
+    }
+
+    collider(dt);
 
     //Perform game operations
     tick(dt);
@@ -491,7 +512,7 @@ setInterval(function (argument) {
         totalTime = totalTime + Math.abs(endTime - startTime);
 
         if (numberOfLoops >= 3600) {
-            Log("app", "Average Loop Execution Time " + (totalTime / numberOfLoops) / 1000000 + "ms", "", false);
+            Log("Average Loop Execution Time " + (totalTime / numberOfLoops) / 1000000 + "ms", "info");
             totalTime = 0;
             numberOfLoops = 0;
         }
