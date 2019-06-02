@@ -63,12 +63,12 @@ app.use('/client', express.static(__dirname + '/client'));
 //Use the specified gameport
 serv.listen(gameport);
 
+//Create socket connection.
+var io = require('socket.io')(serv, {});
+
 Log("###############################################################");
 Log("Server Started on port: " + gameport, "finish");
 Log("###############################################################\n");
-
-//Create socket connection.
-var io = require('socket.io')(serv, {});
 
 //Apply connection to all players who enter the game.
 io.sockets.on('connection', function (socket) {
