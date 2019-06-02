@@ -255,7 +255,7 @@ function Selector(p) {
 
 function collider(dt) {
 
-    var collidedParis = [];
+    var CollidedPairs = [];
 
     //STATIC RESOLUTION
     for (var i in CELL_LIST) {
@@ -288,8 +288,8 @@ function collider(dt) {
                     if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
                         //Add both cells to the colliding pairs array for dynamic resolution later
-                        collidedParis.push(cell);
-                        collidedParis.push(target);
+                        CollidedPairs.push(cell);
+                        CollidedPairs.push(target);
 
                         //Calculate the distance and overlap
                         distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
@@ -328,8 +328,8 @@ function collider(dt) {
                         if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
 
                             //Add both cells to the colliding pairs array for dynamic resolution later
-                            collidedParis.push(cell);
-                            collidedParis.push(target);
+                            CollidedPairs.push(cell);
+                            CollidedPairs.push(target);
 
                             //Calculate the distance and overlap
                             distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
@@ -350,9 +350,9 @@ function collider(dt) {
     }
 
     //DYNAMIC RESOLUTION
-    for (var i = 0; i < collidedParis.length; i += 2) {
-        var cell1 = collidedParis[i];
-        var cell2 = collidedParis[i + 1];
+    for (var i = 0; i < CollidedPairs.length; i += 2) {
+        var cell1 = CollidedPairs[i];
+        var cell2 = CollidedPairs[i + 1];
 
         //Get the distance between the two balls
         distance = getDistance(cell1.x, cell1.y, cell1.size, cell2.x, cell2.y, cell2.size);
