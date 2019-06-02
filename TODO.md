@@ -23,7 +23,7 @@
   * Game-over screen
   * ~~Zoom out 50%~~
   * Remove zoom feature/Create scale factor for the game
-  * Add fullscreen display functionality
+  * ~~Add fullscreen display functionality~~
   
 ## Execution
 
@@ -31,7 +31,7 @@
   * Only send data needed
   * ~~Send only 1 socket emit to the client, rather than multiple of them~~
   * Get rid of all object based functionality, everything should be done in the main loop
-  * Create global.js for all global variable
+  * Create global.js for all global variables
   * Create a "heart beat" to determine player idle time, then kick if they are idle for too long
   * Paralellization
   * Rewrite entire Game in c++ and web assymbly, lol
