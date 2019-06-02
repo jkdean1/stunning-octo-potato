@@ -169,6 +169,7 @@ io.sockets.on('connection', function (socket) {
 
     //When the player clicks the mouse down.
     socket.on('leftmousedown', function (data) {
+
         player.mouseDown = data.state;
         player.mouseSelectFirstX = data.x;
         player.mouseSelectFirstY = data.y;
@@ -182,6 +183,13 @@ io.sockets.on('connection', function (socket) {
                     cell.ty = data.y + player.canvasYZero;
                     cell.target = true;
                 }
+            }
+        }
+
+        for (var i in CELL_LIST) {
+            var cell = CELL_LIST[i];
+            if (cell.id == socket.id) {
+                cell.selected = false;
             }
         }
     });
