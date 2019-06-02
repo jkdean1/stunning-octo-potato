@@ -220,6 +220,18 @@ function Selector(p) {
     var x2 = p.mouseSelectSecondX + p.canvasXZero;
     var y2 = p.mouseSelectSecondY + p.canvasYZero;
 
+    if(x2 < x1){
+        var tmp = x1;
+        x1 = x2;
+        x2 = tmp;
+    }
+
+    if(y2 < y1){
+        var tmp = y1;
+        y1 = y2;
+        y2 = tmp;
+    }
+
     var range = new QuadTreeModule.Rectangle(x1, y1, x2, y2);
     var targets = QUADTREE.query(range);
 
