@@ -34,6 +34,8 @@ var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
 
+var foodImage;
+
 // Variables for controlling visual effects
 var pulser = 0;
 
@@ -74,6 +76,13 @@ function setup() {
     context = this.canvas.getContext('2d');
     width = this.canvas.width = window.innerWidth;
     height = this.canvas.height = window.innerHeight;
+
+    foodImage = document.getElementById('food');
+    var svgDocument = foodImage.contentDocument;
+    foodImage.loaded = false;
+    foodImage.addEventListener('load', function () {
+        foodImage.loaded = true;
+    }, false);
 
     socket.emit('windowResized', {
         w: width,
@@ -130,55 +139,73 @@ function draw(dt) {
     if (cells) {
 
         pulser++;
-        if (pulser >= 60){ pulser = 0;}
+        if (pulser >= 60) {
+            pulser = 0;
+        }
 
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
-            var color = cell.color;
+            if (cell.type != 2) {
+                var color = cell.color;
 
-            if (highQuality) {
-                //grab the color values
-                var roughcolor = cell.color.match(/\d+/g);
-                color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
+                if (highQuality) {
+                    //grab the color values
+                    var roughcolor = cell.color.match(/\d+/g);
+                    color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
 
-                //Create the gradient pulse
-                var offsetBlur = pulser+(i%60);
-                if (offsetBlur>=60){
-                    offsetBlur = offsetBlur-60;
+                    //Create the gradient pulse
+                    var offsetBlur = pulser + (i % 60);
+                    if (offsetBlur >= 60) {
+                        offsetBlur = offsetBlur - 60;
+                    }
+                    if (offsetBlur >= 31) {
+                        offsetBlur = 60 - offsetBlur;
+                    }
+                    // Implement the gradient
+                    var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2 * (offsetBlur / 30));
+                    grd.addColorStop(0, cell.color);
+                    grd.addColorStop(1, color);
+
+                    //Set the fillstyle to the gradient
+                    context.fillStyle = grd;
+
+                    //Render the glow
+                    context.beginPath();
+                    context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
+                    context.closePath();
+                    context.fill();
+
+                    //Fill Color
+                    context.fillStyle = color;
+
+                    //Draw the cell
+                    context.beginPath();
+                    context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
+                    context.closePath();
+                    context.fill();
+
+                    if (cell.selected) {
+                        if (cell.id == ID) {
+                            context.strokeStyle = "white";
+                            context.lineWidth = 1.5;
+                            context.stroke();
+                        }
+                    }
                 }
-                if (offsetBlur >= 31){
-                    offsetBlur = 60 - offsetBlur;
-                }
-                // Implement the gradient
-                var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2*(offsetBlur / 30));
-                grd.addColorStop(0, cell.color);
-                grd.addColorStop(1, color);
+            } else {
+                //foodImage.setAttribute("fill", "#333");
 
-                //Set the fillstyle to the gradient
-                context.fillStyle = grd;
+                //var blueCircle = (new XMLSerializer).serializeToString(svg);
 
-                //Render the glow
-                context.beginPath();
-                context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
-                context.closePath();
-                context.fill();
-            }
+                //var img = new Image();
 
-            //Fill Color
-            context.fillStyle = color;
+                //img.src = "data:image/svg+xml;charset=utf-8," + blueCircle;
 
-            //Draw the cell
-            context.beginPath();
-            context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
-            context.closePath();
-            context.fill();
+                //var image = foodImage.getSVGDocument();
+                context.drawImage(foodImage, cell.x, cell.y, cell.size, cell.size);
 
-            if (cell.selected) {
-                if(cell.id == ID){
-                    context.strokeStyle = "white";
-                    context.lineWidth = 1.5;
-                    context.stroke();
-                }
+
+                //context.drawImage(foodImage, cell.x, cell.y, cell.size, cell.size);
             }
         }
     }
@@ -225,11 +252,10 @@ function toggleFullScreen() {
 
     var elem = document.documentElement;
 
-    if (alreadyFullScreen == 0){
-	elem.requestFullscreen();
-	alreadyFullScreen = 1;
-    }
-    else if (alreadyFullScreen == 1){
+    if (alreadyFullScreen == 0) {
+        elem.requestFullscreen();
+        alreadyFullScreen = 1;
+    } else if (alreadyFullScreen == 1) {
         document.exitFullscreen();
         alreadyFullScreen = 0;
     }
@@ -243,9 +269,9 @@ function startGame() {
     fullbutton = document.getElementById('fullbutton');
     landingdiv.style.transition = 'opacity 1s';
     landingdiv.style.transition = 'bottom 1s';
-    landingdiv.style.bottom='2000px';
+    landingdiv.style.bottom = '2000px';
     //fullbutton.style.opacity = '0.3'; 
-    
+
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {
@@ -277,10 +303,10 @@ function resize() {
     });
 }
 
-function sendName(){
+function sendName() {
     var name = document.getElementById("nameBox").value;
 
-    if(DEBUG){
+    if (DEBUG) {
         console.log(name);
     }
 

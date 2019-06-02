@@ -130,6 +130,7 @@ class Cell {
             id: this.id,
             x: this.x,
             y: this.y,
+            type: this.type,
             color: this.color,
             size: this.size,
             mass: this.mass,

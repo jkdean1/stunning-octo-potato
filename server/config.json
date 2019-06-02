@@ -10,5 +10,5 @@
     "friction": 0.8,
     "maxCells": 600,
     "maxQuadTreeEntities": 10,
-    "logToFile": true
+    "logToFile": false
 }

@@ -1,6 +1,6 @@
 /*
  * Created by Jacob Cox
-*/
+ */
 
 //Import Required Libraries
 var express = require('express');
@@ -65,6 +65,29 @@ serv.listen(gameport);
 
 //Create socket connection.
 var io = require('socket.io')(serv, {});
+
+//Create Food
+for (var i = 0; i < 500; i++) {
+    var food = {
+        type: 2,
+        x: Math.floor(Util.getRandomInt(100, (mapWidth * tileWidth - 100))),
+        y: Math.floor(Util.getRandomInt(100, (mapHeight * tileHeight - 100))),
+        size: 20,
+        valid: true,
+        getInfo: function () {
+            return {
+                valid: this.valid,
+                type: this.type,
+                x: this.x,
+                y: this.y,
+                size: this.size
+            };
+        }
+    }
+
+    FOOD.push(food);
+    var point = new QuadTreeModule.Point(food.x, food.y, food);
+}
 
 Log("###############################################################");
 Log("Server Started on port: " + gameport, "finish");
@@ -133,7 +156,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     //When the player chooses a name (should be added later somehow.. this isnt good)
-    socket.on('name', function(data){
+    socket.on('name', function (data) {
         player.name = data;
     })
 
@@ -228,13 +251,13 @@ function Selector(p) {
     var x2 = p.mouseSelectSecondX + p.canvasXZero;
     var y2 = p.mouseSelectSecondY + p.canvasYZero;
 
-    if(x2 < x1){
+    if (x2 < x1) {
         var tmp = x1;
         x1 = x2;
         x2 = tmp;
     }
 
-    if(y2 < y1){
+    if (y2 < y1) {
         var tmp = y1;
         y1 = y2;
         y2 = tmp;
@@ -377,11 +400,11 @@ function collider(dt) {
         var m1 = (dpnorm1 * (cell1.mass - cell2.mass) + 2 * cell2.mass * dpnorm2) / (cell1.mass + cell2.mass);
         var m2 = (dpnorm2 * (cell2.mass - cell2.mass) + 2 * cell1.mass * dpnorm1) / (cell1.mass + cell2.mass);
 
-        if(tx > 5){
+        if (tx > 5) {
             tx = 5;
         }
 
-        if(ty > 5){
+        if (ty > 5) {
             ty = 5;
         }
 
@@ -457,7 +480,7 @@ function sendInfo() {
             var sendObjects = [];
             for (var o in objects) {
                 var object = objects[o].data;
-                if(object.valid){
+                if (object.valid) {
                     sendObjects.push(object.getInfo());
                 }
             }
@@ -486,7 +509,7 @@ var endTime = 0;
 var totalTime = 0;
 var numberOfLoops = 0;
 
-setInterval(sendInfo, 1000/ 40);
+setInterval(sendInfo, 1000 / 40);
 
 setInterval(heartBeat, 1000);
 
@@ -511,6 +534,12 @@ setInterval(function (argument) {
 
         //Add the cells to the quadtree
         var point = new QuadTreeModule.Point(cell.x, cell.y, cell);
+        QUADTREE.insert(point);
+    }
+
+    for (var f in FOOD) {
+        var food = FOOD[f];
+        var point = new QuadTreeModule.Point(food.x, food.y, food);
         QUADTREE.insert(point);
     }
 
