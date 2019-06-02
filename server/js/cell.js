@@ -1,3 +1,7 @@
+/*
+ * Created by Jacob Cox
+*/
+
 var Blob = require('./blob.js');
 var Util = require('./util.js');
 
