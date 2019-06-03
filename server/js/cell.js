@@ -38,6 +38,7 @@ class Cell {
         this.ty = this.y;
         //target aquired
         this.target = false;
+        this.spawnCount = 0;
 
         this.counterMax = 100;
         this.counter = this.counterMax;

@@ -379,7 +379,8 @@ function collider(dt) {
                     }
                 } else if (cellType == 1 && targetType == 2) {
                     if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
-                        cell.size += 0.5;
+                        cell.size += 1;
+                        cell.spawnCount++;
                         target.valid = false;
                     }
                 }
@@ -441,18 +442,23 @@ function tick(dt) {
         if (CELL_LIST.length < maxCells) {
             //Add a new cell if it is time
             if (cellType == 1) {
-                if (cell.counter == 0) {
-                    var randomDistance = Util.getRandomInt(20, 50);
-                    var randomID = Util.getRandomId();
-                    var temp = new Cell(cell.id, randomID, cell.x, cell.y);
-                    var randomAngle = Math.random() * Math.PI * 2;
-                    temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
-                    temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
-                    temp.target = true;
-                    temp.color = cell.color;
-                    temp.size = 3;
-                    temp.type = 0;
-                    CELL_LIST.push(temp);
+                if(cell.spawnCount > 0){
+                    if (cell.counter == 0) {
+                        var randomDistance = Util.getRandomInt(20, 50);
+                        var randomID = Util.getRandomId();
+                        var temp = new Cell(cell.id, randomID, cell.x, cell.y);
+                        var randomAngle = Math.random() * Math.PI * 2;
+                        temp.tx = Math.cos(randomAngle) * (cell.size + randomDistance) + cell.x;
+                        temp.ty = Math.sin(randomAngle) * (cell.size + randomDistance) + cell.y;
+                        temp.target = true;
+                        temp.color = cell.color;
+                        temp.size = 5;
+                        temp.type = 0;
+                        CELL_LIST.push(temp);
+
+                        cell.spawnCount--;
+                        cell.size -= 0.3;
+                    }
                 }
             }
         }
