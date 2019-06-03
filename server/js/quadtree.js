@@ -144,9 +144,33 @@ class QuadTree {
             this.northeast.query(range, found);
             this.southwest.query(range, found);
             this.southeast.query(range, found);
-        }
+        } 
 
         return found;
+    }
+
+    show(rectangles){
+        if(!rectangles){
+            rectangles = [];
+        }
+
+        if(this.divided){
+            this.northwest.show(rectangles);
+            this.northeast.show(rectangles);
+            this.southwest.show(rectangles);
+            this.southeast.show(rectangles);
+        } else {
+            var rect = {
+                x: this.boundary.x,
+                y: this.boundary.y,
+                w: this.boundary.w,
+                h: this.boundary.h
+            }
+
+            rectangles.push(rect);
+        }
+
+        return rectangles;
     }
 }
 

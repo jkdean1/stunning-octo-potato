@@ -18,6 +18,9 @@ var Player = require('./js/player.js');
 //Import Cell
 var Cell = require('./js/cell.js');
 
+//Import Food
+var Food = require('./js/food.js');
+
 //Import QuadTree
 var QuadTreeModule = require('./js/quadtree.js');
 
@@ -38,7 +41,6 @@ var tileWidth = c.tileWidth;
 var tileHeight = c.tileHeight;
 var maxCells = c.maxCells;
 var maxQuadTreeEntities = c.maxQuadTreeEntities;
-var logToFile = c.logToFile;
 
 //Create Empty arrays and objects for players and game entities
 var SOCKET_LIST = {};
@@ -51,6 +53,16 @@ var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHei
 
 //Create the quadtree
 var QUADTREE = new QuadTreeModule.QuadTree(rectangle, maxQuadTreeEntities);
+
+//Create Food
+for (var i = 0; i < 1500; i++) {
+    var randomX = Math.floor(Util.getRandomInt(100, (mapWidth * tileWidth - 100)));
+    var randomY = Math.floor(Util.getRandomInt(100, (mapHeight * tileHeight - 100)));
+    var f = new Food(randomX, randomY);
+    FOOD.push(f);
+    var point = new QuadTreeModule.Point(randomX, randomY, f);
+    QUADTREE.insert(point);
+}
 
 //Default location for the client
 app.get('/', function (req, res) {
@@ -65,29 +77,6 @@ serv.listen(gameport);
 
 //Create socket connection.
 var io = require('socket.io')(serv, {});
-
-//Create Food
-for (var i = 0; i < 500; i++) {
-    var food = {
-        type: 2,
-        x: Math.floor(Util.getRandomInt(100, (mapWidth * tileWidth - 100))),
-        y: Math.floor(Util.getRandomInt(100, (mapHeight * tileHeight - 100))),
-        size: 20,
-        valid: true,
-        getInfo: function () {
-            return {
-                valid: this.valid,
-                type: this.type,
-                x: this.x,
-                y: this.y,
-                size: this.size
-            };
-        }
-    }
-
-    FOOD.push(food);
-    var point = new QuadTreeModule.Point(food.x, food.y, food);
-}
 
 Log("###############################################################");
 Log("Server Started on port: " + gameport, "finish");
@@ -184,40 +173,21 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    //When the players mouse moves. 
+    //MOUSE MOVES
     socket.on('mousemove', function (data) {
         player.mouseX = data.x;
         player.mouseY = data.y;
     });
 
-    //When the player clicks the mouse down.
+    //LEFT CLICK DOWN
     socket.on('leftmousedown', function (data) {
 
         player.mouseDown = data.state;
         player.mouseSelectFirstX = data.x;
         player.mouseSelectFirstY = data.y;
-
-        for (var i in CELL_LIST) {
-            var cell = CELL_LIST[i];
-
-            if (cell.id == socket.id) {
-                if (cell.selected) {
-                    cell.tx = data.x + player.canvasXZero;
-                    cell.ty = data.y + player.canvasYZero;
-                    cell.target = true;
-                }
-            }
-        }
-
-        for (var i in CELL_LIST) {
-            var cell = CELL_LIST[i];
-            if (cell.id == socket.id) {
-                cell.selected = false;
-            }
-        }
     });
 
-    //When the player clicks the mouse down.
+    //RIGHT CLICK DOWN
     socket.on('rightmousedown', function (data) {
         for (var i in CELL_LIST) {
             var cell = CELL_LIST[i];
@@ -227,25 +197,65 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    //When the player lets the mouse go. 
+    //BOTH CLICK UP
     socket.on('mouseup', function (data) {
         player.mouseDown = data.state;
         player.mouseSelectSecondX = data.x;
         player.mouseSelectSecondY = data.y;
 
-        if (player.mouseSelectFirstX != player.mouseSelectSecondX || player.mouseSelectFirstY != player.mouseSelectSecondY) {
-            Selector(player);
-        }
+        var differenceInSelectionX = Math.abs(player.mouseSelectSecondX - player.mouseSelectFirstX);
+        var differenceInSelectionY = Math.abs(player.mouseSelectSecondY - player.mouseSelectFirstY);
 
-        player.clicked(CELL_LIST);
+        if (differenceInSelectionX > 5 || differenceInSelectionY > 5) {
+            multiSelector(player);
+        } else {
+            singleSelector(player);
+        }
     });
 });
 
-function getDistance(x1, y1, r1, x2, y2, r2) {
-    return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) || 1;
+function singleSelector(p) {
+    var x1 = p.canvasXZero;
+    var y1 = p.canvasYZero;
+    var x2 = p.canvasXZero + p.screenWidth;
+    var y2 = p.canvasYZero + p.screenHeight;
+
+    var range = new QuadTreeModule.Rectangle(x1, y1, x2, y2);
+    var targets = QUADTREE.query(range);
+
+    var flag = false;
+    for (var i in targets) {
+        var target = targets[i].data;
+        if (target.type == 1 || target.type == 0) {
+            if (target.id === p.socket_id) {
+                var distance = Util.getDistance(p.mouseSelectFirstX + p.canvasXZero, p.mouseSelectFirstY + p.canvasYZero, target.x, target.y);
+                if (distance < target.size) {
+                    target.selected = true;
+                    flag = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!flag) {
+        for (var i in CELL_LIST) {
+            var cell = CELL_LIST[i];
+
+            if (cell.id == p.socket_id) {
+                if (cell.selected) {
+                    cell.tx = p.mouseSelectFirstX + p.canvasXZero;
+                    cell.ty = p.mouseSelectFirstY + p.canvasYZero;
+                    cell.target = true;
+
+                    cell.selected = false;
+                }
+            }
+        }
+    }
 }
 
-function Selector(p) {
+function multiSelector(p) {
     var x1 = p.mouseSelectFirstX + p.canvasXZero;
     var y1 = p.mouseSelectFirstY + p.canvasYZero;
     var x2 = p.mouseSelectSecondX + p.canvasXZero;
@@ -315,7 +325,7 @@ function collider(dt) {
                         CollidedPairs.push(target);
 
                         //Calculate the distance and overlap
-                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        distance = Util.getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
                         overlap = (distance - cell.size - target.size) / 2;
 
                         //Resolve Cell Collision
@@ -328,7 +338,7 @@ function collider(dt) {
                     }
                 } else if (cellType == 1 && targetType == 0) {
                     if (cell.id != target.id) {
-                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        distance = Util.getDistance(cell.x, cell.y, target.x, target.y);
                         if (distance < cell.size + target.size) {
                             target.valid = false;
                             cell.size--;
@@ -341,7 +351,7 @@ function collider(dt) {
                     }
                 } else if (cellType == 0 && targetType == 0) {
                     if (cell.id != target.id) {
-                        distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                        distance = Util.getDistance(cell.x, cell.y, target.x, target.y);
                         if (distance < cell.size + target.size) {
                             target.valid = false;
                             cell.valid = false;
@@ -355,7 +365,7 @@ function collider(dt) {
                             CollidedPairs.push(target);
 
                             //Calculate the distance and overlap
-                            distance = getDistance(cell.x, cell.y, cell.size, target.x, target.y, target.size);
+                            distance = Util.getDistance(cell.x, cell.y, target.x, target.y);
                             overlap = (distance - cell.size - target.size) / 2;
 
                             //Resolve Cell Collision
@@ -366,6 +376,11 @@ function collider(dt) {
                             target.x += overlap * (cell.x - target.x) / distance;
                             target.y += overlap * (cell.y - target.y) / distance;
                         }
+                    }
+                } else if (cellType == 1 && targetType == 2) {
+                    if (Util.doCirclesOverlap(cell.x, cell.y, cell.size, target.x, target.y, target.size)) {
+                        cell.size += 0.5;
+                        target.valid = false;
                     }
                 }
             }
@@ -378,7 +393,7 @@ function collider(dt) {
         var cell2 = CollidedPairs[i + 1];
 
         //Get the distance between the two balls
-        distance = getDistance(cell1.x, cell1.y, cell1.size, cell2.x, cell2.y, cell2.size);
+        distance = Util.getDistance(cell1.x, cell1.y, cell2.x, cell2.y);
 
         //get the normal vector
         var nx = (cell2.x - cell1.x) / distance;
@@ -462,7 +477,15 @@ function tick(dt) {
 }
 
 function heartBeat() {
-
+    //REBALANCE MASS
+    for (var i in FOOD) {
+        var food = FOOD[i];
+        if (!food.valid) {
+            food.x = Math.floor(Util.getRandomInt(100, (mapWidth * tileWidth - 100)));
+            food.y = Math.floor(Util.getRandomInt(100, (mapHeight * tileHeight - 100)));
+            food.valid = true;
+        }
+    }
 }
 
 function sendInfo() {
@@ -473,7 +496,11 @@ function sendInfo() {
 
         //Get all objects that are in the quadtree around the player
         var rectangle = new QuadTreeModule.Rectangle(player.canvasXZero, player.canvasYZero, player.canvasXMax, player.canvasYMax);
+        //console.log(player.screenWidth + "   " + player.screenHeight);
+        //console.log(player.canvasXZero + "  " + player.canvasYZero + "  " + player.canvasXMax + "  " + player.canvasYMax);
         var objects = QUADTREE.query(rectangle);
+
+        //console.log(objects.length);
 
         if (objects) {
             //Put all object information inside an array
@@ -489,8 +516,13 @@ function sendInfo() {
         //Grab the player infomation
         var playerInfo = player.getInfo();
 
+        var quadtree = [];
+        if (DEBUG) {
+            quadtree = QUADTREE.show();
+        }
+
         //Send all data to the player
-        socket.emit('update', playerInfo, sendObjects);
+        socket.emit('update', playerInfo, sendObjects, quadtree);
     }
 }
 
@@ -527,7 +559,7 @@ setInterval(function (argument) {
 
     //REDO Quadtree
     var rectangle = new QuadTreeModule.Rectangle((mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2, (mapWidth * tileWidth) / 2, (mapHeight * tileHeight) / 2);
-    QUADTREE = new QuadTreeModule.QuadTree(rectangle, 10);
+    QUADTREE = new QuadTreeModule.QuadTree(rectangle, maxQuadTreeEntities);
 
     for (var c in CELL_LIST) {
         var cell = CELL_LIST[c];
@@ -539,8 +571,10 @@ setInterval(function (argument) {
 
     for (var f in FOOD) {
         var food = FOOD[f];
-        var point = new QuadTreeModule.Point(food.x, food.y, food);
-        QUADTREE.insert(point);
+        if (food.valid) {
+            var point = new QuadTreeModule.Point(food.x, food.y, food);
+            QUADTREE.insert(point);
+        }
     }
 
     collider(dt);

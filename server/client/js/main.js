@@ -1,3 +1,4 @@
+
 //Global Variables
 var socket = io.connect();
 var ID;
@@ -29,7 +30,7 @@ var currMouseX = 0;
 var currMouseY = 0;
 
 //map variables
-var map;
+var quadtree;
 var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
@@ -63,12 +64,14 @@ socket.on('message', function (data) {
     console.log(data);
 });
 
-socket.on('update', function (data1, data2) {
+socket.on('update', function (data1, data2, data3) {
     x = data1.x;
     y = data1.y;
 
     cells = [];
     cells = data2;
+    quadtree = data3;
+
 });
 
 function setup() {
@@ -77,12 +80,7 @@ function setup() {
     width = this.canvas.width = window.innerWidth;
     height = this.canvas.height = window.innerHeight;
 
-    foodImage = document.getElementById('food');
-    var svgDocument = foodImage.contentDocument;
-    foodImage.loaded = false;
-    foodImage.addEventListener('load', function () {
-        foodImage.loaded = true;
-    }, false);
+    console.log(width, height);
 
     socket.emit('windowResized', {
         w: width,
@@ -103,6 +101,9 @@ function draw(dt) {
     var canvasY = y - height / 2;
     var moveX = 0 - canvasX;
     var moveY = 0 - canvasY;
+
+    var count1 = 0;
+    var count2 = 0;
 
     //Reset the canvas
     context.resetTransform();
@@ -129,6 +130,31 @@ function draw(dt) {
                     if (tempX < canvasX + width && tempY < canvasY + height) {
                         context.drawImage(backgroundImage, i * tileWidth, j * tileHeight);
                     }
+                }
+            }
+        }
+    }
+
+    //Draw the Food
+    if (cells) {
+
+        for (var i in cells) {
+            count1++;
+            var cell = cells[i];
+            if (cell.type === 2) {
+                
+
+                if (cell.x > canvasX - 10 && cell.y > canvasY - 10 && cell.x < canvasX + width + 10 && cell.y < canvasY + height + 10) {
+                    count2++;
+                    context.beginPath();
+                    context.moveTo(cell.x + cell.size * Math.cos(0), cell.y + cell.size * Math.sin(0));
+                    var side = 0;
+                    for (side; side < 7; side++) {
+                        context.lineTo(cell.x + cell.size * Math.cos(side * 2 * Math.PI / 6), cell.y + cell.size * Math.sin(side * 2 * Math.PI / 6));
+                    }
+                    context.closePath();
+                    context.fillStyle = cell.color;
+                    context.fill();
                 }
             }
         }
@@ -174,38 +200,24 @@ function draw(dt) {
                     context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
                     context.closePath();
                     context.fill();
+                }
 
-                    //Fill Color
-                    context.fillStyle = color;
+                //Fill Color
+                context.fillStyle = color;
 
-                    //Draw the cell
-                    context.beginPath();
-                    context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
-                    context.closePath();
-                    context.fill();
+                //Draw the cell
+                context.beginPath();
+                context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
+                context.closePath();
+                context.fill();
 
-                    if (cell.selected) {
-                        if (cell.id == ID) {
-                            context.strokeStyle = "white";
-                            context.lineWidth = 1.5;
-                            context.stroke();
-                        }
+                if (cell.selected) {
+                    if (cell.id == ID) {
+                        context.strokeStyle = "white";
+                        context.lineWidth = 1.5;
+                        context.stroke();
                     }
                 }
-            } else {
-                //foodImage.setAttribute("fill", "#333");
-
-                //var blueCircle = (new XMLSerializer).serializeToString(svg);
-
-                //var img = new Image();
-
-                //img.src = "data:image/svg+xml;charset=utf-8," + blueCircle;
-
-                //var image = foodImage.getSVGDocument();
-                context.drawImage(foodImage, cell.x, cell.y, cell.size, cell.size);
-
-
-                //context.drawImage(foodImage, cell.x, cell.y, cell.size, cell.size);
             }
         }
     }
@@ -234,6 +246,26 @@ function draw(dt) {
             context.fill();
             context.textAlign = 'center';
             context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+        }
+    }
+
+    //console.log("Count1: " + count1 + " Count2: " + count2);
+
+
+    if(DEBUG){
+        if(quadtree){
+            for(var i in quadtree){
+                var rect = quadtree[i];
+                context.strokeStyle = "white";
+                var rectX = rect.x - rect.w;
+                var rectY = rect.y - rect.h;
+                var rectW = rect.w * 2;
+                var rectH = rect.h * 2;
+                if (rectX  > canvasX - rect.w && rectY > canvasY - rect.h && rectW < canvasX + width + rect.w && rectH < canvasY + height + rect.h){
+                    context.rect(rectX, rectY, rectW, rectH);
+                }
+                context.stroke();
+            }
         }
     }
 }
