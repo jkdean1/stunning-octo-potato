@@ -2,7 +2,7 @@
 
 ## Gameplay
 
-- [ ] Add food particles
+- [x] Add food particles
 - [ ] Add death-to-food
 - [x] Make the selection glow only apear for the player it is selected for, not everyone on the server.
 
@@ -11,7 +11,7 @@
 - [x] Make glowing look less intimidating
 - [ ] Create a UI Layer on top of the canvas
 - [ ] Add a player count display
-- [ ] Create full screen Button
+- [x] Create full screen Button
 
 ## Usability
 
@@ -38,7 +38,7 @@
 - [ ] Create and send player count to each player, once a second. 
 - [ ] Remove ability to select a location outside of the map
 - [ ] Replace names that could be inaproprate with names that are, but still related
-- [ ] Example: Dick becomes Richard
+    -  Example: Dick becomes Richard
 - [ ] Create maximum character amount for the name
 - [ ] remove nuclear reactions
   
