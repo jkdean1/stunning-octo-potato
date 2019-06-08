@@ -43,9 +43,9 @@
 - [ ] remove nuclear reactions
   
 
-  ## Unit Testing/Code Testing 
+## Unit Testing/Code Testing 
 
-- [ ] Add a librry to help with lint an unit tests
+- [ ] Add a library to help with lint an unit tests
 - [ ] Create lint and run with gulp
 - [ ] Create unit tests and run with gulp
 - [ ] Have people play game to see if it works
