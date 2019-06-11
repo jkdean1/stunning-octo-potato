@@ -2,10 +2,10 @@
  * Created by Jacob Cox
  */
 
-var Util = require('./Util.js');
+var Util = require('./util.js');
 
 class Food {
-    constructor(x, y){
+    constructor(x, y) {
         this.valid = true;
         this.type = 2;
         this.x = x;
@@ -14,7 +14,7 @@ class Food {
         this.color = Util.getRandomHSLColor();
     }
 
-    getInfo(){
+    getInfo() {
         return {
             type: this.type,
             color: this.color,
