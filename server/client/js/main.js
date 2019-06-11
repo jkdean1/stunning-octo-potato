@@ -1,4 +1,3 @@
-
 //Global Variables
 var socket = io.connect();
 var ID;
@@ -142,7 +141,7 @@ function draw(dt) {
             count1++;
             var cell = cells[i];
             if (cell.type === 2) {
-                
+
 
                 if (cell.x > canvasX - 10 && cell.y > canvasY - 10 && cell.x < canvasX + width + 10 && cell.y < canvasY + height + 10) {
                     count2++;
@@ -250,18 +249,16 @@ function draw(dt) {
     }
 
     //console.log("Count1: " + count1 + " Count2: " + count2);
-
-
-    if(DEBUG){
-        if(quadtree){
-            for(var i in quadtree){
+    if (DEBUG) {
+        if (quadtree) {
+            for (var i in quadtree) {
                 var rect = quadtree[i];
                 context.strokeStyle = "white";
                 var rectX = rect.x - rect.w;
                 var rectY = rect.y - rect.h;
                 var rectW = rect.w * 2;
                 var rectH = rect.h * 2;
-                if (rectX  > canvasX - rect.w && rectY > canvasY - rect.h && rectW < canvasX + width + rect.w && rectH < canvasY + height + rect.h){
+                if (rectX > canvasX - rect.w && rectY > canvasY - rect.h && rectW < canvasX + width + rect.w && rectH < canvasY + height + rect.h) {
                     context.rect(rectX, rectY, rectW, rectH);
                 }
                 context.stroke();
@@ -284,27 +281,29 @@ function toggleFullScreen() {
 
     var elem = document.documentElement;
 
-    if (alreadyFullScreen == 0){
-        if (elem.requestFullscreen){
+    if (alreadyFullScreen == 0) {
+        if (elem.requestFullscreen) {
             elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen){
+        } else if (elem.mozRequestFullScreen) {
             elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen){
+        } else if (elem.webkitRequestFullscreen) {
             elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen){
+        } else if (elem.msRequestFullscreen) {
             elem.msRequestFullscreen();
         }
         alreadyFullScreen = 1;
-    }
-    else if (alreadyFullScreen == 1){
+    } else if (alreadyFullScreen == 1) {
         document.exitFullscreen();
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) { /* Firefox */
+        } else if (document.mozCancelFullScreen) {
+            /* Firefox */
             document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+        } else if (document.webkitExitFullscreen) {
+            /* Chrome, Safari and Opera */
             document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { /* IE/Edge */
+        } else if (document.msExitFullscreen) {
+            /* IE/Edge */
             document.msExitFullscreen();
         }
         alreadyFullScreen = 0;
