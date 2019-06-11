@@ -2,13 +2,13 @@
     "name": "Stunning-Octo-Potato",
     "host": "0.0.0.0",
     "port": 3001,
-    "debug": true,
+    "debug": false,
     "mapWidth": 50,
     "mapHeight": 50,
     "tileWidth": 128, 
     "tileHeight": 128,
     "friction": 0.8,
     "maxCells": 600,
-    "maxQuadTreeEntities": 10,
-    "logToFile": true
+    "maxQuadTreeEntities": 4,
+    "logToFile": false
 }

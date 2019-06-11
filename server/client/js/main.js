@@ -1,3 +1,4 @@
+
 //Global Variables
 var socket = io.connect();
 var ID;
@@ -29,10 +30,12 @@ var currMouseX = 0;
 var currMouseY = 0;
 
 //map variables
-var map;
+var quadtree;
 var circles;
 var backgroundImage = new Image();
 backgroundImage.src = 'client/res/img/tile2.jpg';
+
+var foodImage;
 
 // Variables for controlling visual effects
 var pulser = 0;
@@ -61,12 +64,14 @@ socket.on('message', function (data) {
     console.log(data);
 });
 
-socket.on('update', function (data1, data2) {
+socket.on('update', function (data1, data2, data3) {
     x = data1.x;
     y = data1.y;
 
     cells = [];
     cells = data2;
+    quadtree = data3;
+
 });
 
 function setup() {
@@ -74,6 +79,8 @@ function setup() {
     context = this.canvas.getContext('2d');
     width = this.canvas.width = window.innerWidth;
     height = this.canvas.height = window.innerHeight;
+
+    console.log(width, height);
 
     socket.emit('windowResized', {
         w: width,
@@ -94,6 +101,9 @@ function draw(dt) {
     var canvasY = y - height / 2;
     var moveX = 0 - canvasX;
     var moveY = 0 - canvasY;
+
+    var count1 = 0;
+    var count2 = 0;
 
     //Reset the canvas
     context.resetTransform();
@@ -125,59 +135,88 @@ function draw(dt) {
         }
     }
 
+    //Draw the Food
+    if (cells) {
+
+        for (var i in cells) {
+            count1++;
+            var cell = cells[i];
+            if (cell.type === 2) {
+                
+
+                if (cell.x > canvasX - 10 && cell.y > canvasY - 10 && cell.x < canvasX + width + 10 && cell.y < canvasY + height + 10) {
+                    count2++;
+                    context.beginPath();
+                    context.moveTo(cell.x + cell.size * Math.cos(0), cell.y + cell.size * Math.sin(0));
+                    var side = 0;
+                    for (side; side < 7; side++) {
+                        context.lineTo(cell.x + cell.size * Math.cos(side * 2 * Math.PI / 6), cell.y + cell.size * Math.sin(side * 2 * Math.PI / 6));
+                    }
+                    context.closePath();
+                    context.fillStyle = cell.color;
+                    context.fill();
+                }
+            }
+        }
+    }
+
     context.fillStyle = "black";
     //Draw the cells
     if (cells) {
 
         pulser++;
-        if (pulser >= 60){ pulser = 0;}
+        if (pulser >= 60) {
+            pulser = 0;
+        }
 
         for (var i = 0; i < cells.length; i++) {
             var cell = cells[i];
-            var color = cell.color;
+            if (cell.type != 2) {
+                var color = cell.color;
 
-            if (highQuality) {
-                //grab the color values
-                var roughcolor = cell.color.match(/\d+/g);
-                color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
+                if (highQuality) {
+                    //grab the color values
+                    var roughcolor = cell.color.match(/\d+/g);
+                    color = "rgba(" + roughcolor[0] + "," + roughcolor[1] + "," + roughcolor[2] + ",0)";
 
-                //Create the gradient pulse
-                var offsetBlur = pulser+(i%60);
-                if (offsetBlur>=60){
-                    offsetBlur = offsetBlur-60;
+                    //Create the gradient pulse
+                    var offsetBlur = pulser + (i % 60);
+                    if (offsetBlur >= 60) {
+                        offsetBlur = offsetBlur - 60;
+                    }
+                    if (offsetBlur >= 31) {
+                        offsetBlur = 60 - offsetBlur;
+                    }
+                    // Implement the gradient
+                    var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2 * (offsetBlur / 30));
+                    grd.addColorStop(0, cell.color);
+                    grd.addColorStop(1, color);
+
+                    //Set the fillstyle to the gradient
+                    context.fillStyle = grd;
+
+                    //Render the glow
+                    context.beginPath();
+                    context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
+                    context.closePath();
+                    context.fill();
                 }
-                if (offsetBlur >= 31){
-                    offsetBlur = 60 - offsetBlur;
-                }
-                // Implement the gradient
-                var grd = context.createRadialGradient(cell.x, cell.y, cell.size, cell.x, cell.y, cell.size * 1.1 + 2*(offsetBlur / 30));
-                grd.addColorStop(0, cell.color);
-                grd.addColorStop(1, color);
 
-                //Set the fillstyle to the gradient
-                context.fillStyle = grd;
+                //Fill Color
+                context.fillStyle = color;
 
-                //Render the glow
+                //Draw the cell
                 context.beginPath();
-                context.arc(cell.x, cell.y, cell.size * 3, 0, Math.PI * 2);
+                context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
                 context.closePath();
                 context.fill();
-            }
 
-            //Fill Color
-            context.fillStyle = color;
-
-            //Draw the cell
-            context.beginPath();
-            context.arc(cell.x, cell.y, cell.size, 0, Math.PI * 2);
-            context.closePath();
-            context.fill();
-
-            if (cell.selected) {
-                if(cell.id == ID){
-                    context.strokeStyle = "white";
-                    context.lineWidth = 1.5;
-                    context.stroke();
+                if (cell.selected) {
+                    if (cell.id == ID) {
+                        context.strokeStyle = "white";
+                        context.lineWidth = 1.5;
+                        context.stroke();
+                    }
                 }
             }
         }
@@ -207,6 +246,26 @@ function draw(dt) {
             context.fill();
             context.textAlign = 'center';
             context.fillText('[ ' + x + ',' + y + ']', x, y - 10);
+        }
+    }
+
+    //console.log("Count1: " + count1 + " Count2: " + count2);
+
+
+    if(DEBUG){
+        if(quadtree){
+            for(var i in quadtree){
+                var rect = quadtree[i];
+                context.strokeStyle = "white";
+                var rectX = rect.x - rect.w;
+                var rectY = rect.y - rect.h;
+                var rectW = rect.w * 2;
+                var rectH = rect.h * 2;
+                if (rectX  > canvasX - rect.w && rectY > canvasY - rect.h && rectW < canvasX + width + rect.w && rectH < canvasY + height + rect.h){
+                    context.rect(rectX, rectY, rectW, rectH);
+                }
+                context.stroke();
+            }
         }
     }
 }
@@ -260,9 +319,9 @@ function startGame() {
     fullbutton = document.getElementById('fullbutton');
     landingdiv.style.transition = 'opacity 1s';
     landingdiv.style.transition = 'bottom 1s';
-    landingdiv.style.bottom='2000px';
+    landingdiv.style.bottom = '2000px';
     //fullbutton.style.opacity = '0.3'; 
-    
+
     window.addEventListener('resize', resize, false);
 
     window.addEventListener("load", function () {
@@ -294,10 +353,10 @@ function resize() {
     });
 }
 
-function sendName(){
+function sendName() {
     var name = document.getElementById("nameBox").value;
 
-    if(DEBUG){
+    if (DEBUG) {
         console.log(name);
     }
 

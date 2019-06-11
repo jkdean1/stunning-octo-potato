@@ -2,7 +2,6 @@
  * Created by Jacob Cox
 */
 
-var Blob = require('./blob.js');
 var Util = require('./util.js');
 
 class Cell {
@@ -39,6 +38,7 @@ class Cell {
         this.ty = this.y;
         //target aquired
         this.target = false;
+        this.spawnCount = 0;
 
         this.counterMax = 100;
         this.counter = this.counterMax;
@@ -130,6 +130,7 @@ class Cell {
             id: this.id,
             x: this.x,
             y: this.y,
+            type: this.type,
             color: this.color,
             size: this.size,
             mass: this.mass,
