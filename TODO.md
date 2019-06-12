@@ -27,6 +27,10 @@
   
 ## Execution
 
+- [ ] Fix quadtree
+    - [ ] Interprets position incorrectly when outside the map
+    - [ ] Sends excessive data
+    - [ ] AA BB collision
 - [ ] Rework game looping to include separation based on necessity
 - [ ] Only send data needed
 - [x] Send only 1 socket emit to the client, rather than multiple of them
